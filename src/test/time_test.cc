@@ -1,9 +1,6 @@
 //
 // Created by 杨丰硕 on 2023/1/8.
 //
-//
-// Created by 杨丰硕 on 2023/1/8.
-//
 #include "../base/Timestamp.h"
 #include <gtest/gtest.h>
 

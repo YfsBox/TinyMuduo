@@ -1,6 +1,7 @@
 set(SRCS
         base/Timestamp.cc
         base/Thread.cc
+        net/SockAddress.cc
         )
 
 # main library
@@ -13,3 +14,6 @@ target_link_libraries(time_test tinymuduo gtest)
 
 add_executable(thread_test test/thread_test.cc)
 target_link_libraries(thread_test tinymuduo gtest)
+
+add_executable(socket_test test/socket_test.cc)
+target_link_libraries(socket_test tinymuduo gtest)
