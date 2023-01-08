@@ -10,9 +10,11 @@
 namespace TinyMuduo {
     class TimeStamp {
     public:
-        TimeStamp();
+        TimeStamp() = default;
 
-        ~TimeStamp();
+        explicit TimeStamp(uint64_t mill_seconds);
+
+        ~TimeStamp() = default;
 
         static const uint64_t MillSecondsPerSecond = 1000;
 
@@ -22,7 +24,7 @@ namespace TinyMuduo {
 
         std::string getTimeFormatString() const;
 
-        uint64_t getMillSeconds() {
+        uint64_t getMillSeconds() const {
             return mill_seconds_;
         }
 

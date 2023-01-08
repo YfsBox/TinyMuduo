@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
-project (TinyMuduo)
+project(TinyMuduo CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(TinyMuduo  library.cpp)
+set(CXX_FLAGS
+        -g
+        -Wall
+        -std=c++17
+        -D_PTHREADS
+        -Wno-unused-parameter
+        -O3
+        )
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
+
+add_subdirectory(src)
+add_subdirectory(example)
