@@ -1,0 +1,2 @@
+/usr/bin/ar qc libTinyMuduo.a  CMakeFiles/TinyMuduo.dir/library.cpp.o
+/usr/bin/ranlib libTinyMuduo.a
