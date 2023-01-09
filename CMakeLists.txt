@@ -9,7 +9,6 @@ set(CXX_FLAGS
         -std=c++17
         -D_PTHREADS
         -Wno-unused-parameter
-        -O3
         )
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 

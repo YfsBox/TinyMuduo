@@ -61,7 +61,10 @@ void Thread::joinThread() {
     if (!is_join_ && is_start) {        // join和start可以用来描述线程的状态
         is_join_ = true;
         is_start = false;
-        thread_->join();
+        if (thread_->joinable()) {
+            printf("The thread %s will joined\n", thread_name_.c_str());
+            thread_->join();
+        }
     }
 }
 

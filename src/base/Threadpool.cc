@@ -39,6 +39,7 @@ void ThreadPool::stop() {
     not_full_condition_.notify_all();
     not_empty_condition_.notify_all();
     for (auto &thread : pool_threads_) {
+        // printf("The thread %s will joined\n", thread->getThreadName().c_str());
         thread->joinThread();
     }
 }

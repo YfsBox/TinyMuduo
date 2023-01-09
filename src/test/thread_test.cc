@@ -29,7 +29,6 @@ TEST(THREAD_TEST, BASIC_TEST) {
     // 检查一下created
     ASSERT_EQ(TinyMuduo::Thread::getCreatedThreadNum(), 100);
     ASSERT_EQ(TinyMuduo::Thread::getDefaultName(), "thread_100");
-    // 然后集中开启,等待一会并检查结果
     for (size_t i = 0; i < 50; ++i) {
         add_threads[i]->startThread();
     }
@@ -100,10 +99,17 @@ TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
             add_cnt++;
         });     // 加入计算任务
     }
+    printf("The add cnt is %d\n", int(add_cnt));
     printf("push the tasks ever\n");
-    pool1.stop();
-    printf("The add cnt is %d", int(add_cnt));
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    // 关闭掉线程池
+    printf("The add cnt is %d\n", int(add_cnt));
 
+    printf("The add cnt is %d\n", int(add_cnt));
+
+    pool1.stop();
+
+    printf("The add cnt is %d\n", int(add_cnt));
 }
 
 int main(int argc, char* argv[]) {
