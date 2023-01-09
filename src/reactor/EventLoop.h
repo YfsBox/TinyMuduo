@@ -5,4 +5,11 @@
 #ifndef TINYMUDUO_EVENTLOOP_H
 #define TINYMUDUO_EVENTLOOP_H
 
+namespace TinyMuduo {
+    class EventLoop {
+    public:
+    private:
+    };
+}
+
 #endif //TINYMUDUO_EVENTLOOP_H

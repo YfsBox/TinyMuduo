@@ -13,6 +13,8 @@ namespace TinyMuduo {
     class SockAddress {
     public:
 
+        SockAddress();
+
         explicit SockAddress(uint32_t port);
 
         SockAddress(const std::string &ip, uint32_t port);
@@ -32,6 +34,12 @@ namespace TinyMuduo {
         const sockaddr *getSockAddr() const {
             return reinterpret_cast<const sockaddr*>(&sockaddr_in_);
         }
+
+        socklen_t getSocketLen() const {
+            return sizeof(*getSockAddr());
+        }
+
+        void setSockaddr(const sockaddr_in &sockAddress);
 
     private:
 

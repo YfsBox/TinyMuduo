@@ -2,6 +2,7 @@ set(SRCS
         base/Timestamp.cc
         base/Thread.cc
         net/SockAddress.cc
+        net/Socket.cc
         )
 
 # main library

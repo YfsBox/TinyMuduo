@@ -8,6 +8,10 @@
 
 using namespace TinyMuduo;
 
+SockAddress::SockAddress() {
+    memset(&sockaddr_in_, 0, sizeof(sockaddr_in_)); // 直接清空初始化
+}
+
 SockAddress::SockAddress(uint32_t port) {       // 这个时候其相关IP就是any，也就是0.0.0.0
     memset(&sockaddr_in_, 0, sizeof(sockaddr_in_));
     sockaddr_in_.sin_family = AF_INET;
@@ -38,6 +42,9 @@ uint16_t SockAddress::getPort() const {
     return ::ntohs(sockaddr_in_.sin_port);
 }
 
+void SockAddress::setSockaddr(const sockaddr_in &sockaddrIn) {
+    sockaddr_in_ = sockaddrIn;
+}
 
 
 
