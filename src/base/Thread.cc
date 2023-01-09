@@ -6,8 +6,12 @@
 
 using namespace TinyMuduo;
 
-namespace CurrThreadSpace {
+namespace TinyMuduo::CurrThreadSpace {
+
     thread_local pid_t CurrThreadId = -1;
+
+    thread_local EventLoop* LoopInThisThread = nullptr;
+
     void setCurrThreadId() {
         if (CurrThreadId == -1) {
             CurrThreadId = static_cast<pid_t>(gettid());

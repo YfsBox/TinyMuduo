@@ -13,6 +13,18 @@
 
 namespace TinyMuduo {
 
+    class EventLoop;
+
+    namespace CurrThreadSpace {
+
+        extern thread_local pid_t CurrThreadId;
+
+        extern thread_local EventLoop* LoopInThisThread;
+
+        void setCurrThreadId();
+
+    }
+
     class Thread {
     public:
         using ThreadFunc = std::function<void()>;

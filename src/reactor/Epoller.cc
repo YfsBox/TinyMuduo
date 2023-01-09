@@ -16,9 +16,11 @@ Epoller::~Epoller() {
     ::close(epoller_fd_);
 }
 
-uint16_t Epoller::epoll(int timeout, ChannelVector &channel_list) {
-    int epoll_cnt = ::epoll_wait(epoller_fd_, &*events_.begin(),
-                                 static_cast<int>(events_.size()), timeout);    // max_size就是一次读取的最大事件数
+uint16_t Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
+    auto timeout_millsecond = timeout_second * MillSecondsPerSecond;        // epoll中的单位是mill second，要先转化一下
+
+    uint16_t epoll_cnt = ::epoll_wait(epoller_fd_, &*events_.begin(),
+                                 static_cast<int>(events_.size()), timeout_millsecond);    // max_size就是一次读取的最大事件数
 
     for (size_t i = 0; i < epoll_cnt; ++i) {       // 这里有一个地方需要注意, 要用的是epoll_cnt,而不是直接遍历events
         // 从中读取指针，其中藏着Channel的指针

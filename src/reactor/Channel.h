@@ -10,6 +10,7 @@
 #include "../net/Socket.h"
 
 namespace TinyMuduo {
+    class EventLoop;
     class Channel {
     public:
         using CallBackFunc = std::function<void()>;
@@ -17,6 +18,8 @@ namespace TinyMuduo {
         static const uint32_t NULL_EVENT;
         static const uint32_t READ_EVENT;
         static const uint32_t WRITE_EVENT;
+
+        explicit Channel(EventLoop *eventLoop);
 
         Channel();
 
@@ -62,7 +65,10 @@ namespace TinyMuduo {
             event_ |= WRITE_EVENT;
         }
 
+        void handleEvent();
+
     private:
+        EventLoop *owner_loop_;
         uint32_t event_;    // 驱动事件
         uint32_t revent_; // 返回事件
         Socket socket_;     // 其实Channel并不是直接暴漏的，而是被封装到了channel里

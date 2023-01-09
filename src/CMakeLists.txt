@@ -3,6 +3,9 @@ set(SRCS
         base/Thread.cc
         net/SockAddress.cc
         net/Socket.cc
+        reactor/Channel.cc
+        reactor/Epoller.cc
+        reactor/EventLoop.cc
         )
 
 # main library
@@ -18,3 +21,6 @@ target_link_libraries(thread_test tinymuduo gtest)
 
 add_executable(socket_test test/socket_test.cc)
 target_link_libraries(socket_test tinymuduo gtest)
+
+add_executable(eventloop_test test/eventloop_test.cc)
+target_link_libraries(eventloop_test tinymuduo gtest)
