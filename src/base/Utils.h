@@ -6,26 +6,37 @@
 #define TINYMUDUO_UTILS_H
 
 #include <iostream>
+#include <random>
 
-class DebugUtil {
-public:
-    explicit DebugUtil(const std::string &msg);
-    ~DebugUtil();
+namespace MyMuduo::Utils {
 
-    DebugUtil(const DebugUtil& debug) = delete;
-    DebugUtil& operator=(const DebugUtil& debug) = delete;
+    class DebugUtil {
+    public:
+        explicit DebugUtil(const std::string &msg);
 
-private:
-    std::string msg_;
-};
+        ~DebugUtil();
 
-DebugUtil::DebugUtil(const std::string &msg):msg_(msg) {
-    std::cout << "Debug begin: " << msg_ << '\n';
+        DebugUtil(const DebugUtil &debug) = delete;
+
+        DebugUtil &operator=(const DebugUtil &debug) = delete;
+
+    private:
+        std::string msg_;
+    };
+
+    DebugUtil::DebugUtil(const std::string &msg) : msg_(msg) {
+        std::cout << "Debug begin: " << msg_ << '\n';
+    }
+
+    DebugUtil::~DebugUtil() {
+        std::cout << "Debug end: " << msg_ << '\n';
+    }
+
+
 }
 
-DebugUtil::~DebugUtil() {
-    std::cout << "Debug end: " << msg_ << '\n';
-}
+
+
 
 
 

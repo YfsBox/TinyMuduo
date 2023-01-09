@@ -1,8 +1,10 @@
 //
 // Created by 杨丰硕 on 2023/1/8.
 //
-#include "../base/Thread.h"
+#include <random>
 #include <gtest/gtest.h>
+#include "../base/Thread.h"
+#include "../base/Threadpool.h"
 
 TEST(THREAD_TEST, BASIC_TEST) {
     std::atomic<uint32_t> num_cnt = 0;
@@ -68,6 +70,39 @@ TEST(THREAD_TEST, THREADID_TEST) {
             thread->joinThread();   // 逐个关闭
         }*/
     }
+
+}
+
+TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
+    // 首先应该生成随机数,为每个线程分配随机的sleep时间
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(-500, 500);
+    auto rnd = std::bind(dist, mt);
+    // 计算一个变量,用于检测线程池的结果,并且定义线程池中的计算函数
+    std::atomic<int> add_cnt = 0;
+    // 定义线程池，并启动
+    TinyMuduo::ThreadPool pool1(1024, 192, "pool1");
+
+    ASSERT_EQ(pool1.getName(), "pool1");
+    ASSERT_EQ(pool1.getQueueSize(), 0);
+    ASSERT_EQ(pool1.isRunning(), false);
+
+    pool1.start();
+    printf("The pool1 start\n");
+
+    // 加入240个计算任务
+    size_t task_num = 2048;
+    for (size_t i = 0; i < task_num; ++i) {
+        pool1.pushTask([&]() {
+            // printf("run task %zu", i);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000 + rnd()));
+            add_cnt++;
+        });     // 加入计算任务
+    }
+    printf("push the tasks ever\n");
+    pool1.stop();
+    printf("The add cnt is %d", int(add_cnt));
 
 }
 
