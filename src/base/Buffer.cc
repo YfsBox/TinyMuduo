@@ -8,7 +8,7 @@
 using namespace TinyMuduo;
 // 这里利用iovec可以读取到非连续的多个buffer中的特点，处理了readv到buffer中需要扩容的情况
 ssize_t Buffer::read(int fd, int *err) {
-    size_t extra_max_len = 65536;       // 64k意味着什么
+    size_t extra_max_len = 65536;
     char extra_buffer[extra_max_len];
     iovec iovecs[2];
     iovecs[0].iov_base = writableHeader();

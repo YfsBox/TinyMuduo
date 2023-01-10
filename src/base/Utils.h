@@ -32,6 +32,16 @@ namespace MyMuduo::Utils {
         std::cout << "Debug end: " << msg_ << '\n';
     }
 
+    class noncopyable {
+    public:
+        noncopyable(const noncopyable&) = delete;
+        void operator=(const noncopyable&) = delete;
+
+    protected:
+        noncopyable() = default;
+        ~noncopyable() = default;
+    };
+
 
 }
 

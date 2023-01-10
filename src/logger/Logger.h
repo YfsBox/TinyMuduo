@@ -5,4 +5,11 @@
 #ifndef TINYMUDUO_LOGGER_H
 #define TINYMUDUO_LOGGER_H
 
+namespace TinyMuduo {
+    class Logger {
+    public:
+    private:
+    };
+}
+
 #endif //TINYMUDUO_LOGGER_H
