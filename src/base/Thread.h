@@ -14,6 +14,7 @@
 namespace TinyMuduo {
 
     class EventLoop;
+    class CountDownLatch;
 
     namespace CurrThreadSpace {
 
@@ -60,6 +61,7 @@ namespace TinyMuduo {
 
         pid_t thread_id_;  // 如何通过thread获取其中的thread_id呢
         std::unique_ptr<std::thread> thread_; // 如果直接使用std::thread作为对象的话，就会在构造函数期间就开始运行了
+        std::shared_ptr<CountDownLatch> countdown_latch_;
         std::string thread_name_;
         ThreadFunc main_func_;      // 该thread的主循环函数
         static std::atomic<uint32_t> created_thread_num_;

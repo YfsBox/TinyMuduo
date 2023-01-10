@@ -53,7 +53,7 @@ void ThreadPool::pushTask(Task task) {      // 将Task加入到队列
         task();
     } else {
         std::unique_lock<std::mutex> lockGuard(lock_);
-        while (isQueueFull()) {
+        while (isQueueFull() && is_running_) {
             not_full_condition_.wait(lockGuard);
         }
         // 将任务加入到queue中
@@ -70,7 +70,7 @@ void ThreadPool::pushTask(Task task) {      // 将Task加入到队列
 ThreadPool::Task ThreadPool::popTask() {    // 从队列里取出一个task,提供给线程运行
     Task task;
     std::unique_lock<std::mutex> lockGuard(lock_);
-    while (isQueueEmpty()) {    // 如果是empty,就等待not empty
+    while (isQueueEmpty() && is_running_) {    // 如果是empty,就等待not empty
         not_empty_condition_.wait(lockGuard);
     }
     if (!is_running_) {
@@ -94,6 +94,7 @@ void ThreadPool::doTaskInThread() {
             task();
         }
     }
+    // printf("the thread %d has finish\n", CurrThreadSpace::CurrThreadId);
 }
 
 

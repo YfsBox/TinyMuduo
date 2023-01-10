@@ -62,7 +62,7 @@ void Thread::joinThread() {
         is_join_ = true;
         is_start = false;
         if (thread_->joinable()) {
-            printf("The thread %s will joined\n", thread_name_.c_str());
+            // printf("The thread %d will joined\n", thread_id_);
             thread_->join();
         }
     }

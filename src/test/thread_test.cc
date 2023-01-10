@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include "../base/Thread.h"
 #include "../base/Threadpool.h"
+#include "../base/CountDownLatch.h"
 
 TEST(THREAD_TEST, BASIC_TEST) {
     std::atomic<uint32_t> num_cnt = 0;
@@ -72,6 +73,8 @@ TEST(THREAD_TEST, THREADID_TEST) {
 
 }
 
+
+
 TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
     // 首先应该生成随机数,为每个线程分配随机的sleep时间
     std::random_device rd;
@@ -81,7 +84,7 @@ TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
     // 计算一个变量,用于检测线程池的结果,并且定义线程池中的计算函数
     std::atomic<int> add_cnt = 0;
     // 定义线程池，并启动
-    TinyMuduo::ThreadPool pool1(1024, 192, "pool1");
+    TinyMuduo::ThreadPool pool1(192, 192, "pool1");
 
     ASSERT_EQ(pool1.getName(), "pool1");
     ASSERT_EQ(pool1.getQueueSize(), 0);
@@ -100,16 +103,17 @@ TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
         });     // 加入计算任务
     }
     printf("The add cnt is %d\n", int(add_cnt));
-    printf("push the tasks ever\n");
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     // 关闭掉线程池
-    printf("The add cnt is %d\n", int(add_cnt));
-
     printf("The add cnt is %d\n", int(add_cnt));
 
     pool1.stop();
 
-    printf("The add cnt is %d\n", int(add_cnt));
+    ASSERT_EQ(add_cnt, 2048);
+}
+
+TEST(COUNTDOWNLATCH_TEST, BASIC_COUNTDOWNLATCH_TEST) {
+    size_t wait_thread_cnt = 100;
 }
 
 int main(int argc, char* argv[]) {

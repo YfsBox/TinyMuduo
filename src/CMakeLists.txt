@@ -2,6 +2,8 @@ set(SRCS
         base/Timestamp.cc
         base/Thread.cc
         base/Threadpool.cc
+        base/CountDownLatch.cc
+        base/Buffer.cc
         net/SockAddress.cc
         net/Socket.cc
         reactor/Channel.cc
