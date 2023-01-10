@@ -8,7 +8,7 @@
 #include <iostream>
 #include <random>
 
-namespace MyMuduo::Utils {
+namespace TinyMuduo::Utils {
     /*
     class DebugUtil {
     public:

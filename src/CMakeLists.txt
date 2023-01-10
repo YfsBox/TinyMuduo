@@ -5,6 +5,7 @@ set(SRCS
         base/CountDownLatch.cc
         base/Buffer.cc
         logger/LoggerStream.cc
+        logger/Logger.cc
         net/SockAddress.cc
         net/Socket.cc
         reactor/Channel.cc

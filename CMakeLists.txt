@@ -10,6 +10,7 @@ set(CXX_FLAGS
         -D_PTHREADS
         -Wno-unused-parameter
         )
+
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 add_subdirectory(src)

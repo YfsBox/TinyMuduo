@@ -49,7 +49,7 @@ namespace TinyMuduo {
     };
 
 
-    class LoggerStream: MyMuduo::Utils::noncopyable {
+    class LoggerStream: TinyMuduo::Utils::noncopyable {
     public:
 
         LoggerStream& operator<<(const std::string &str) {
