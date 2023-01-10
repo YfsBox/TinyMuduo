@@ -16,7 +16,6 @@ namespace TinyMuduo {
     class FixedBuffer {
     public:
 
-
         FixedBuffer():curr_(buffer_) {}
         ~FixedBuffer() = default;
 
@@ -50,7 +49,6 @@ namespace TinyMuduo {
     };
 
 
-
     class LoggerStream: MyMuduo::Utils::noncopyable {
     public:
 
@@ -72,6 +70,14 @@ namespace TinyMuduo {
 
         LoggerStream& operator<<(uint);
 
+        LoggerStream& operator<<(int64_t);
+
+        LoggerStream& operator<<(uint64_t);
+
+        LoggerStream& operator<<(int16_t);
+
+        LoggerStream& operator<<(uint16_t);
+
         LoggerStream& operator<<(char ch) {
             append(&ch, 1);
             return *this;
@@ -86,7 +92,18 @@ namespace TinyMuduo {
 
         LoggerStream& operator<<(float);
 
+        size_t getBufferLen() const {
+            return buffer_.getCurr() - buffer_.begin();
+        }
+
+        const char *getBuffer() const {
+            return buffer_.begin();
+        }
+
     private:
+
+        template<class InterType>
+        void appendForInter(InterType val);
 
         void append(const char *content, size_t len) {
             buffer_.append(content, len);

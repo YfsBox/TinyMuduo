@@ -4,6 +4,7 @@ set(SRCS
         base/Threadpool.cc
         base/CountDownLatch.cc
         base/Buffer.cc
+        logger/LoggerStream.cc
         net/SockAddress.cc
         net/Socket.cc
         reactor/Channel.cc
@@ -27,3 +28,6 @@ target_link_libraries(socket_test tinymuduo gtest)
 
 add_executable(eventloop_test test/eventloop_test.cc)
 target_link_libraries(eventloop_test tinymuduo gtest)
+
+add_executable(log_test test/log_test.cc)
+target_link_libraries(log_test tinymuduo gtest)

@@ -9,7 +9,7 @@
 #include <random>
 
 namespace MyMuduo::Utils {
-
+    /*
     class DebugUtil {
     public:
         explicit DebugUtil(const std::string &msg);
@@ -30,7 +30,7 @@ namespace MyMuduo::Utils {
 
     DebugUtil::~DebugUtil() {
         std::cout << "Debug end: " << msg_ << '\n';
-    }
+    }*/
 
     class noncopyable {
     public:
