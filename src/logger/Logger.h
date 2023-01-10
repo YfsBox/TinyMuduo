@@ -31,7 +31,7 @@ namespace TinyMuduo {
 
         static outputFunc LoggerOutput;
 
-        Logger(unsigned int lineno, LogLevel level, const char *func);
+        Logger(const char *filename, unsigned int lineno, LogLevel level, const char *func);
 
         ~Logger();
 
@@ -50,6 +50,8 @@ namespace TinyMuduo {
         }
 
     private:
+
+        std::string getFileName(const char *name);
         unsigned int line_number_;
         LogLevel level_;
         LoggerStream stream_;
@@ -58,16 +60,16 @@ namespace TinyMuduo {
 
 
 #define LOG_INFO    \
-TinyMuduo::Logger(__LINE__, TinyMuduo::Logger::LogLevel::INFO, __FUNCTION__).getStream()
+TinyMuduo::Logger(__FILE__, __LINE__, TinyMuduo::Logger::LogLevel::INFO, __FUNCTION__).getStream()
 
 #define LOG_ERROR   \
-TinyMuduo::Logger(__LINE__, TinyMuduo::Logger::LogLevel::ERROR, __FUNCTION__).getStream()
+TinyMuduo::Logger(__FILE__, __LINE__, TinyMuduo::Logger::LogLevel::ERROR, __FUNCTION__).getStream()
 
 #define LOG_DEBUG   \
-TinyMuduo::Logger(__LINE__, TinyMuduo::Logger::LogLevel::DEBUG, __FUNCTION__).getStream()
+TinyMuduo::Logger(__FILE__, __LINE__, TinyMuduo::Logger::LogLevel::DEBUG, __FUNCTION__).getStream()
 
 #define LOG_FATAL   \
-TinyMuduo::Logger(__LINE__, TinyMuduo::Logger::LogLevel::FATAL, __FUNCTION__).getStream()
+TinyMuduo::Logger(__FILE__, __LINE__, TinyMuduo::Logger::LogLevel::FATAL, __FUNCTION__).getStream()
 // 利用匿名对象
 
     // void defaultOutput(const char *buf, size_t len);

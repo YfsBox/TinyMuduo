@@ -19,18 +19,18 @@ void defaultOutput(const char *buf, size_t len) {
 
 Logger::outputFunc Logger::LoggerOutput(defaultOutput);
 
-Logger::Logger(unsigned int lineno, LogLevel level, const char *func):
+Logger::Logger(const char * filename, unsigned int lineno, LogLevel level, const char *func):
         line_number_(lineno),
         level_(level),
         stream_(),
         time_stamp_(TimeStamp::getNowTimeStamp()) {
     stream_ << "[" << LevelMapVec[level_] << "] ";
     stream_ << time_stamp_.getTimeFormatString();
-    stream_ << " LINE_NO: " << lineno;
+    stream_ << " " << getFileName(filename) << ": " << lineno;
     stream_ << " " << func;
 }
 
-Logger::~Logger() {
+Logger::~Logger() {     // RAII真是无处不在
     // 将buffer中的内容代入到output函数中
     auto buffer = stream_.getBuffer();
     LoggerOutput(buffer, stream_.getBufferLen());
@@ -38,4 +38,12 @@ Logger::~Logger() {
 
 void Logger::setLoggerOutput(outputFunc ofunc) {
     LoggerOutput = ofunc;
+}
+
+std::string Logger::getFileName(const char *name) {
+    const char* slash = strrchr(name, '/');
+    if (slash) {
+        return slash + 1;
+    }
+    return name;
 }
