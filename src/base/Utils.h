@@ -49,7 +49,7 @@ namespace TinyMuduo::Utils {
 
         ~CalTimeUtil() {
             auto end_time_mills = TimeStamp::getNowTimeStamp().getMillSeconds();
-            std::cout << (end_time_mills - start_time_.getMillSeconds()) /
+            std::cout << "The time cost is " << (end_time_mills - start_time_.getMillSeconds()) /
             TimeStamp::MillSecondsPerSecond << '\n';
         }
 

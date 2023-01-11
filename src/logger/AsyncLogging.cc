@@ -85,14 +85,30 @@ void AsyncLogging::logThreadFunc() {        // 这个是日志线程的主要逻
             log_output << output_buffer->getData();
         }
 
+        if (output_buffers.size() > 2) {        // 调整大小
+            output_buffers.resize(2);
+        }
+        /*
         if (new_buffer1 == nullptr) {
             new_buffer1 = std::make_unique<Buffer>();           // 可以考虑重新分配, 也可以考虑从outputs中交换出来一个
         }
         if (new_buffer2 == nullptr) {
             new_buffer2 = std::make_unique<Buffer>();
+        }*/
+
+        if (new_buffer1 == nullptr) {
+            new_buffer1 = std::move(output_buffers.back());
+            output_buffers.pop_back();
+            new_buffer1->reset();
         }
 
+        if (new_buffer2 == nullptr) {
+            new_buffer2 = std::move(output_buffers.back());
+            output_buffers.pop_back();
+            new_buffer2->reset();
+        }
         output_buffers.clear();
+        log_output.flush();
     }
-
+    log_output.flush();         // flush的作用,了解一下C++ std io
 }

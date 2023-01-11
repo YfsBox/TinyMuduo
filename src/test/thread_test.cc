@@ -73,8 +73,6 @@ TEST(THREAD_TEST, THREADID_TEST) {
 
 }
 
-
-
 TEST(THREADPOOL_TEST, BASIC_THREADPOOL_TEST) {
     // 首先应该生成随机数,为每个线程分配随机的sleep时间
     std::random_device rd;

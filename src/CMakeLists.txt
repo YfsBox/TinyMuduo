@@ -19,17 +19,17 @@ add_library(tinymuduo ${SRCS})
 target_link_libraries(tinymuduo rt pthread)
 
 # for test
-add_executable(time_test test/time_test.cc)
+add_executable(time_test test/time_test.cc test/test_utils.cc)
 target_link_libraries(time_test tinymuduo gtest)
 
-add_executable(thread_test test/thread_test.cc)
+add_executable(thread_test test/thread_test.cc test/test_utils.cc)
 target_link_libraries(thread_test tinymuduo gtest)
 
-add_executable(socket_test test/socket_test.cc)
+add_executable(socket_test test/socket_test.cc test/test_utils.cc)
 target_link_libraries(socket_test tinymuduo gtest)
 
-add_executable(eventloop_test test/eventloop_test.cc)
+add_executable(eventloop_test test/eventloop_test.cc test/test_utils.cc)
 target_link_libraries(eventloop_test tinymuduo gtest)
 
-add_executable(log_test test/log_test.cc)
+add_executable(log_test test/log_test.cc test/test_utils.cc)
 target_link_libraries(log_test tinymuduo gtest)

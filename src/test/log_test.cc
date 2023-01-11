@@ -2,10 +2,10 @@
 // Created by 杨丰硕 on 2023/1/10.
 //
 #include <gtest/gtest.h>
+#include "test_utils.h"
+#include "../base/Threadpool.h"
 #include "../base/Utils.h"
-#include "../base/Timestamp.h"
 #include "../logger/Logger.h"
-#include "../logger/LoggerStream.h"
 #include "../logger/AsyncLogging.h"
 
 using namespace TinyMuduo;
@@ -37,6 +37,7 @@ TEST(LOG_TEST, LOGGER_TEST) {
 }
 
 TEST(LOG_TEST, ASYNCLOGGING_TEST) {
+
     AsyncLogging::getInstance().init(3, "test_log");
     AsyncLogging::getInstance().start();
 
@@ -45,17 +46,56 @@ TEST(LOG_TEST, ASYNCLOGGING_TEST) {
         Utils::CalTimeUtil caltime;
         for (size_t i = 0; i < 500; ++i) {
             LOG_INFO << "hello,world asdfghjklzxcvbnmqwertyuiop" <<
-            TimeStamp::getNowTimeStamp().getTimeFormatString() << '\n';
+            TimeStamp::getNowTimeStamp().getTimeFormatString() << "the cnt is " << i <<'\n';
         }
     }
     printf("wait a little......\n");
-    auto wait_thread = []() {
+    auto wait_thread_func = []() {
          std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     };
 
+    Thread wait_thread(wait_thread_func);
+    wait_thread.startThread();
+    wait_thread.joinThread();
+
     AsyncLogging::getInstance().stop();     // 停止
+
 }
 
+TEST(LOG_TEST, ASYNCLOGGING_MUlTI_TEST) {       // 模拟多个线程写日志的场景进行测试
+    // 启动日志系统
+    AsyncLogging::getInstance().init(3, "multi_test_log");
+    AsyncLogging::getInstance().start();
+    ASSERT_TRUE(AsyncLogging::getInstance().isRunning());
+    // 启动一个线程池
+    ThreadPool pool(192, 192);
+    pool.start();
+    // 加入输出日志的任务,目标1000条日志
+    for (size_t i = 0; i < 1000; ++i) {
+        pool.pushTask([i](){
+            size_t wait_time = 200 + (static_cast<size_t>(std::rand()) % 500);
+            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+            LOG_DEBUG << "hello,world asdfghjklzxcvbnmqwertyuiop" <<
+            " the log id is " << i << " and wait " << wait_time << "mills\n";
+        });
+    }
+    // 模拟其他计算操作
+    std::atomic_int wait_cnt = 1000;
+    printf("push many cnt sub......\n");
+    for (size_t i = 0; i < 1000; ++i) {
+        pool.pushTask([&wait_cnt]() {
+            size_t wait_time = 200 + (static_cast<size_t>(std::rand()) % 500);
+            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+            wait_cnt--;
+        });
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    printf("stop pool and logger system and check wait cnt\n");
+    ASSERT_EQ(wait_cnt, 0);
+    // 关闭线程池和日志系统
+    // pool.stop();
+    AsyncLogging::getInstance().stop();
+}
 
 int main(int argc, char* argv[]) {
     testing::InitGoogleTest(&argc, argv);
