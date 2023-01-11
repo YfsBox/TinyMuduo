@@ -9,35 +9,28 @@ using namespace TinyMuduo;
 
 const std::string AsyncLogging::DEFAULT_LOGTHREAD_NAME = "Log Backend Thread";
 
-
-AsyncLogging::AsyncLogging(uint32_t interval, const std::string &filename):
-    is_running_(false),
-    flush_interval_(interval),
-    logfile_name_(filename),
-    log_thread_(std::bind(&AsyncLogging::logThreadFunc, this),
-                DEFAULT_LOGTHREAD_NAME) {
+void AsyncLogging::init(uint32_t interval, const std::string &filename) {
+    is_running_ = false;
+    flush_interval_ = interval;
+    logfile_name_ = filename;
+    log_thread_ = std::make_unique<Thread>(std::bind(&AsyncLogging::logThreadFunc, this),
+                                           DEFAULT_LOGTHREAD_NAME);
     curr_buffer_ = std::make_unique<Buffer>();
     next_buffer_ = std::make_unique<Buffer>();
     full_buffers_.reserve(DEFAULT_FULLBUFFERS_SIZE);
 }
 
-AsyncLogging::~AsyncLogging() {
-    if (isRunning()) {
-        stop();
-    }
-}
-
 void AsyncLogging::start() {
     if (!is_running_) {
         is_running_ = true;
-        log_thread_.startThread();
+        log_thread_->startThread();
     }
 }
 
 void AsyncLogging::stop() {
     if (is_running_) {
         is_running_ = false;
-        log_thread_.joinThread();
+        log_thread_->joinThread();
     }
 }
 
@@ -62,7 +55,7 @@ void AsyncLogging::logThreadFunc() {        // 这个是日志线程的主要逻
     BufferPtr new_buffer2 = std::make_unique<Buffer>();
 
     BufferVec output_buffers;
-    // output_buffers.reserve(DEFAULT_FULLBUFFERS_SIZE);
+    output_buffers.reserve(DEFAULT_FULLBUFFERS_SIZE);
 
     auto wait_condition = [&]()-> bool {
         return !full_buffers_.empty();
@@ -101,6 +94,5 @@ void AsyncLogging::logThreadFunc() {        // 这个是日志线程的主要逻
 
         output_buffers.clear();
     }
-
 
 }

@@ -2,9 +2,11 @@
 // Created by 杨丰硕 on 2023/1/10.
 //
 #include <gtest/gtest.h>
+#include "../base/Utils.h"
 #include "../base/Timestamp.h"
 #include "../logger/Logger.h"
 #include "../logger/LoggerStream.h"
+#include "../logger/AsyncLogging.h"
 
 using namespace TinyMuduo;
 
@@ -32,6 +34,26 @@ TEST(LOG_TEST, LOGGER_TEST) {
     }
 
     LOG_INFO << "dsjdjshdjshadhhwudhubjbcbjhshdkajldasldkslnmcn9128923811ppppds/;..ds";
+}
+
+TEST(LOG_TEST, ASYNCLOGGING_TEST) {
+    AsyncLogging::getInstance().init(3, "test_log");
+    AsyncLogging::getInstance().start();
+
+    ASSERT_TRUE(AsyncLogging::getInstance().isRunning());
+    {
+        Utils::CalTimeUtil caltime;
+        for (size_t i = 0; i < 500; ++i) {
+            LOG_INFO << "hello,world asdfghjklzxcvbnmqwertyuiop" <<
+            TimeStamp::getNowTimeStamp().getTimeFormatString() << '\n';
+        }
+    }
+    printf("wait a little......\n");
+    auto wait_thread = []() {
+         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    };
+
+    AsyncLogging::getInstance().stop();     // 停止
 }
 
 

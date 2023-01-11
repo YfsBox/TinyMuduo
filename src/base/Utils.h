@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <random>
+#include "../base/Timestamp.h"
 
 namespace TinyMuduo::Utils {
     /*
@@ -40,6 +41,23 @@ namespace TinyMuduo::Utils {
     protected:
         noncopyable() = default;
         ~noncopyable() = default;
+    };
+
+    class CalTimeUtil {     // 利用RAII进行计时, 并输出
+    public:
+        explicit CalTimeUtil():start_time_(TimeStamp::getNowTimeStamp()) {}
+
+        ~CalTimeUtil() {
+            auto end_time_mills = TimeStamp::getNowTimeStamp().getMillSeconds();
+            std::cout << (end_time_mills - start_time_.getMillSeconds()) /
+            TimeStamp::MillSecondsPerSecond << '\n';
+        }
+
+        CalTimeUtil(const CalTimeUtil&) = delete;
+        void operator=(const CalTimeUtil&) = delete;
+
+    private:
+        TimeStamp start_time_;
     };
 
 

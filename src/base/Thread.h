@@ -24,6 +24,8 @@ namespace TinyMuduo {
 
         void setCurrThreadId();
 
+        pid_t getCurrThreadId();
+
     }
 
     class Thread {

@@ -17,6 +17,13 @@ namespace TinyMuduo::CurrThreadSpace {
             CurrThreadId = static_cast<pid_t>(gettid());
         }
     }
+
+    pid_t getCurrThreadId() {
+        if (CurrThreadId == -1) {
+            setCurrThreadId();
+        }
+        return CurrThreadId;
+    }
 }
 
 std::atomic<uint32_t> TinyMuduo::Thread::created_thread_num_ = 0;

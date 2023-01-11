@@ -13,7 +13,7 @@
 #include "LoggerStream.h"
 
 namespace TinyMuduo {
-    class AsyncLogging {
+    class AsyncLogging: Utils::noncopyable {
     public:
 
         static const uint32_t DEFAULT_INTERVAL = 3;
@@ -22,10 +22,17 @@ namespace TinyMuduo {
 
         static const std::string DEFAULT_LOGTHREAD_NAME;
 
-        explicit AsyncLogging(uint32_t interval = DEFAULT_INTERVAL,
-                              const std::string &filename = DEFAULT_LOGTHREAD_NAME);
+        AsyncLogging() = default;
 
-        ~AsyncLogging();
+        ~AsyncLogging() = default;
+
+        static AsyncLogging& getInstance() {
+            static AsyncLogging instance;
+            return instance;
+        }
+
+        void init(uint32_t interval = DEFAULT_INTERVAL,
+                  const std::string &filename = DEFAULT_LOGTHREAD_NAME);
 
         void start();
 
@@ -47,7 +54,7 @@ namespace TinyMuduo {
         std::atomic_bool is_running_;
         uint32_t flush_interval_;
         std::string logfile_name_;
-        Thread log_thread_;     // 日志输出所需要的线程
+        std::unique_ptr<Thread> log_thread_;     // 日志输出所需要的线程
         std::mutex mutex_;
         std::condition_variable condition_;
 

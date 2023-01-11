@@ -4,6 +4,7 @@ set(SRCS
         base/Threadpool.cc
         base/CountDownLatch.cc
         base/Buffer.cc
+        logger/AsyncLogging.cc
         logger/LoggerStream.cc
         logger/Logger.cc
         net/SockAddress.cc

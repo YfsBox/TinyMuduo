@@ -2,6 +2,8 @@
 // Created by 杨丰硕 on 2023/1/8.
 //
 #include <stdio.h>
+#include "../base/Thread.h"
+#include "AsyncLogging.h"
 #include "Logger.h"
 
 using namespace TinyMuduo;
@@ -14,7 +16,11 @@ std::vector<std::string> Logger::LevelMapVec = {
 };
 
 void defaultOutput(const char *buf, size_t len) {
-    ::fwrite(buf, 1, len, stdout);    // 写入标准输出
+    if (AsyncLogging::getInstance().isRunning()) {
+         AsyncLogging::getInstance().append(buf, len);
+    } else {
+        ::fwrite(buf, 1, len, stdout);    // 写入标准输出
+    }
 }
 
 Logger::outputFunc Logger::LoggerOutput(defaultOutput);
@@ -24,10 +30,11 @@ Logger::Logger(const char * filename, unsigned int lineno, LogLevel level, const
         level_(level),
         stream_(),
         time_stamp_(TimeStamp::getNowTimeStamp()) {
-    stream_ << "[" << LevelMapVec[level_] << "] ";
-    stream_ << time_stamp_.getTimeFormatString();
-    stream_ << " " << getFileName(filename) << ": " << lineno;
-    stream_ << " " << func;
+    stream_ << "[" << time_stamp_.getTimeFormatString() << "]";
+    stream_ << "[tid:" << CurrThreadSpace::getCurrThreadId() << "]";
+    stream_ << "[" << getFileName(filename) << ": " << lineno;
+    stream_ << " " << func << "]";
+    stream_ << "[" << LevelMapVec[level_] << "]";
 }
 
 Logger::~Logger() {     // RAII真是无处不在

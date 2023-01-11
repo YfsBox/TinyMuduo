@@ -53,6 +53,10 @@ namespace TinyMuduo {
             return end() - getCurr();
         }
 
+        std::string toString() const {
+            return buffer_;
+        }
+
     private:
         char buffer_[SIZE];
         char *curr_;
