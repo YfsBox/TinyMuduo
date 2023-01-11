@@ -111,4 +111,5 @@ void AsyncLogging::logThreadFunc() {        // 这个是日志线程的主要逻
         log_output.flush();
     }
     log_output.flush();         // flush的作用,了解一下C++ std io
+    log_output.close();
 }

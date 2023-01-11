@@ -16,10 +16,10 @@ namespace TinyMuduo {
         Socket();       // 其中会有对socket的创建
 
         ~Socket();
-        // 禁用拷贝
-        Socket(const Socket&) = delete;
 
-        Socket& operator=(const Socket&) = delete;
+        Socket(const Socket&) = default;
+
+        Socket& operator=(const Socket&) = default;
 
         int getFd() const {
             return fd_;

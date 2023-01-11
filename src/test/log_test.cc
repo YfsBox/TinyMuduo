@@ -71,16 +71,20 @@ TEST(LOG_TEST, ASYNCLOGGING_MUlTI_TEST) {       // 模拟多个线程写日志�
     ThreadPool pool(192, 192);
     pool.start();
     // 加入输出日志的任务,目标1000条日志
+    std::atomic_int wait_cnt = 0;
     for (size_t i = 0; i < 1000; ++i) {
-        pool.pushTask([i](){
-            size_t wait_time = 200 + (static_cast<size_t>(std::rand()) % 500);
-            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+        pool.pushTask([i,&wait_cnt](){
+            size_t wait_time = rand() % 45;
+            //std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
             LOG_DEBUG << "hello,world asdfghjklzxcvbnmqwertyuiop" <<
             " the log id is " << i << " and wait " << wait_time << "mills\n";
+            wait_cnt++;
         });
     }
     // 模拟其他计算操作
-    std::atomic_int wait_cnt = 1000;
+    printf("wait and check wait_cnt......\n");
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    ASSERT_EQ(wait_cnt, 1000);
     printf("push many cnt sub......\n");
     for (size_t i = 0; i < 1000; ++i) {
         pool.pushTask([&wait_cnt]() {
@@ -96,6 +100,8 @@ TEST(LOG_TEST, ASYNCLOGGING_MUlTI_TEST) {       // 模拟多个线程写日志�
     // pool.stop();
     AsyncLogging::getInstance().stop();
 }
+
+// 日志丢失是由什么原因造成的
 
 int main(int argc, char* argv[]) {
     testing::InitGoogleTest(&argc, argv);

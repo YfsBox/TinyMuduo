@@ -2,6 +2,7 @@
 // Created by 杨丰硕 on 2023/1/9.
 //
 #include "Channel.h"
+#include "../net/Socket.h"
 
 using namespace TinyMuduo;
 
@@ -9,11 +10,13 @@ const uint32_t Channel::NULL_EVENT = 0;
 const uint32_t Channel::READ_EVENT = EPOLLIN | EPOLLPRI; // 带外数据到底指的是什么??
 const uint32_t Channel::WRITE_EVENT = EPOLLOUT;
 
-Channel::Channel(EventLoop *eventLoop):owner_loop_(eventLoop) {}
+Channel::Channel(EventLoop *eventLoop, int fd):
+    owner_loop_(eventLoop),
+    fd_(fd) {}
 
-Channel::Channel():socket_() {}
+Channel::Channel():fd_(-1) {}
 
-Channel::~Channel() {}
+Channel::~Channel() = default;
 
 void Channel::handleEvent() {
     // 根据handle来判断
