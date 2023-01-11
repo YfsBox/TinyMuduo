@@ -16,7 +16,9 @@ namespace TinyMuduo {
     class FixedBuffer {
     public:
 
-        FixedBuffer():curr_(buffer_) {}
+        FixedBuffer():curr_(buffer_) {
+            reset();        // 清空缓冲区内容
+        }
         ~FixedBuffer() = default;
 
         void append(const char *content, size_t len) {
@@ -31,12 +33,20 @@ namespace TinyMuduo {
             return buffer_;
         }
 
+        const char *getData() const {
+            return buffer_;
+        }
+
         const char *end() const {
             return buffer_ + sizeof(buffer_);
         }
 
         const char *getCurr() const {
             return curr_;
+        }
+
+        void reset() {
+            memset(buffer_, 0, sizeof(buffer_));
         }
 
         size_t getAvail() const {
