@@ -5,6 +5,7 @@
 #include "EventLoop.h"
 #include "Epoller.h"
 #include "Channel.h"
+#include "../base/Timestamp.h"
 #include "../base/Thread.h"
 
 using namespace TinyMuduo;
@@ -25,12 +26,11 @@ EventLoop::~EventLoop() {
 }
 
 void EventLoop::updateChannel(Channel *channel) {
-
+    epoller_->updateChannel(channel);
 }
 
 void EventLoop::removeChannel(Channel *channel) {
-
-
+    epoller_->removeChannel(channel);
 }
 
 
@@ -40,7 +40,7 @@ void EventLoop::loop(int timeout) {
 
     while (!is_quit_) {
         active_channels_.clear();
-        auto epoll_wait_cnt = epoller_->epoll(timeout, active_channels_);
+        auto return_time = epoller_->epoll(-1, active_channels_);
 
         for (auto channel : active_channels_) {
             channel->handleEvent();     // 处理返回的事件

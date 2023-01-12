@@ -37,7 +37,7 @@ namespace TinyMuduo {
         std::atomic_bool is_quit_;
         const pid_t thread_id_;
         std::mutex mutex_;
-        std::unique_ptr<Epoller> epoller_;
+        std::unique_ptr<Epoller> epoller_;  // 一个EventLoop是一个Epoller的所有者
         ChannelVector active_channels_;     // 用于存放从epoller中所读取的channels
         std::list<QueuedFunctor> queued_list_;
     };

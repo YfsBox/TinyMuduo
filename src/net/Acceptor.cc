@@ -16,13 +16,17 @@ Acceptor::Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr)
     // 需要结合socket以及channel进行调整
     socket_.bindSockAddress(addr);  // 还需要设置为非阻塞I/O
     // 将socket设置为非阻塞I/O
-    channel_.setReadable();         // 除了修改event，还应该对epoller进行修改，而对epoller修改需要间接地通过loop修改
     channel_.setReadCallBack(std::bind(&Acceptor::handleNewConn, this));
+}
+
+Acceptor::~Acceptor() {
+    channel_.setEvent(Channel::NULL_EVENT);
 }
 
 void Acceptor::listen() {
     is_listen_ = true;
     socket_.listen();
+    channel_.setReadable();         // 除了修改event，还应该对epoller进行修改，而对epoller修改需要间接地通过loop修改
 }
 
 void Acceptor::handleNewConn() {

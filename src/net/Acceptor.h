@@ -20,7 +20,7 @@ namespace TinyMuduo {
 
         Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr);
 
-        ~Acceptor() = default;
+        ~Acceptor();
 
         bool isListening() const {
             return is_listen_;          // 怎样才算是listen呢?应该说是加入到其Eve

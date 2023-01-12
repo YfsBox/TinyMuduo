@@ -33,3 +33,6 @@ target_link_libraries(eventloop_test tinymuduo gtest)
 
 add_executable(log_test test/log_test.cc test/test_utils.cc)
 target_link_libraries(log_test tinymuduo gtest)
+
+add_executable(channel_test test/channel_test.cc test/test_utils.cc)
+target_link_libraries(channel_test tinymuduo gtest)

@@ -31,7 +31,7 @@ namespace TinyMuduo {
         Channel();
 
         ~Channel();
-
+        // 设置一些Callback,目前只实现了读写相关的
         void setReadCallBack(CallBackFunc cb) {
             read_callback_ = cb;
         }
@@ -39,7 +39,7 @@ namespace TinyMuduo {
         void setWriteCallBack(CallBackFunc cb) {
             write_callback_ = cb;
         }
-
+        // 获取事件
         uint32_t getEvent() const {
             return event_;
         }
@@ -50,6 +50,7 @@ namespace TinyMuduo {
 
         void setEvent(uint32_t event) {
             event_ = event;
+            update();
         }
 
         void setRevent(uint32_t revent) {
@@ -75,13 +76,13 @@ namespace TinyMuduo {
         }
 
         void update() {
-            state_ = addedChannel;
+            // state_ = addedChannel;
             owner_loop_->updateChannel(this);
         }
 
         void remove() {
             owner_loop_->removeChannel(this);
-            state_ = delChannel;    //  处于移除状态
+            // state_ = delChannel;    //  处于移除状态
         }
 
         bool isInLoop() const {
@@ -113,7 +114,10 @@ namespace TinyMuduo {
         CallBackFunc read_callback_;
         CallBackFunc write_callback_;
     };
+    //  一般的使用方式:首先设置callback，然后设置writable、readable。
+    // writable和readable中有update，update间接地借助loop调用了epoller中的updatechannel
 
+    // 如果一个channel处于创建之初,也就是new,则是执行加入map以及EPOLL_CTL_ADD等操作
 }
 
 #endif //TINYMUDUO_CHANNEL_H

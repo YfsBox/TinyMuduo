@@ -12,6 +12,9 @@ using namespace TinyMuduo;
 
 Epoller::Epoller():epoller_fd_(::epoll_create1(EPOLL_CLOEXEC)) {    // 其中EPOLL_CLOEXEC表示的是该描述符是具有
     // O_CLOEXEC的特性的
+    if (epoller_fd_ < 0) {
+        LOG_ERROR << "epoll fd create error\n";
+    }
     events_.resize(INIT_EVENT_SIZE);    //  设置event数组
 }
 
@@ -95,7 +98,8 @@ void Epoller::update(uint32_t op, Channel *channel) {
     int ret = ::epoll_ctl(epoller_fd_, op, channel->getFd(), &event);
 
     if (ret <  0) {
-        LOG_ERROR << "epoll ctl " << channel->getFd() << " error\n";
+        LOG_ERROR << "epoll ctl " << channel->getFd() << " error, channel fd is " <<
+        channel->getFd() << '\n';
     }
 }
 

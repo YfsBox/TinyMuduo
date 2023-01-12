@@ -54,6 +54,14 @@ namespace TinyMuduo {
 
         static std::string getDefaultName();
 
+        bool isJoined() const {
+            return is_join_;
+        }
+
+        bool isStart() const {
+            return is_start;
+        }
+
     private:
 
         void setFunc(ThreadFunc func);
