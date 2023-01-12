@@ -2,6 +2,8 @@
 // Created by 杨丰硕 on 2023/1/12.
 //
 #include <gtest/gtest.h>
+#include <fcntl.h>
+#include <sys/eventfd.h>
 #include "../logger/Logger.h"
 #include "../base/Thread.h"
 #include "../reactor/Channel.h"
@@ -52,19 +54,20 @@ TestChannel::~TestChannel() {
 
 void TestChannel::readingFunc() {
     auto tmpcnt = read_cnt_;
-    char buf[5] = "read";
+    uint64_t num = 1;
     while (tmpcnt) {
         LOG_DEBUG << "begin write to test channel " << test_channel_->getFd() << " wait "
         << interval_millseconds_ << " mills before write";
         std::this_thread::sleep_for(std::chrono::milliseconds(interval_millseconds_));
-        ::write(test_channel_->getFd(), buf, sizeof(buf));
+        ::write(test_channel_->getFd(), &num, sizeof(num));
         tmpcnt--;
     }
 }
 
 TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
     // 创建一个Socket及其Channel
-    Socket socket;
+    auto socket_fd = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+    Socket socket(socket_fd);
     ASSERT_TRUE(socket.getFd() > 0);
     LOG_DEBUG << "Create a loop, and start a loop thread.";
     EventLoop loop;
@@ -90,6 +93,7 @@ TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
     testChannel.stop();
     loop.quit();
     loop_thread.joinThread();
+    ASSERT_EQ(excepted_cnt, 0);
     LOG_DEBUG << "test end";
 }
 
@@ -163,3 +167,5 @@ int main(int argc, char* argv[]) {
     RUN_ALL_TESTS();
     return 0;
 }
+
+// epoll不可以监听普通的文件,关于epoll可以监听事件的类型，这个坑等到写完之后再填

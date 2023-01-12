@@ -32,12 +32,21 @@ namespace TinyMuduo {
 
         void quit(); // 通常会被外部调用,用来关闭该loop
 
+        void wakeup();
+
     private:
+
+        int createWakeupFd();
+
         std::atomic_bool is_looping_;
         std::atomic_bool is_quit_;
         const pid_t thread_id_;
         std::mutex mutex_;
         std::unique_ptr<Epoller> epoller_;  // 一个EventLoop是一个Epoller的所有者
+
+        int wakeup_fd_;
+        std::unique_ptr<Channel> wakeup_channel_;
+
         ChannelVector active_channels_;     // 用于存放从epoller中所读取的channels
         std::list<QueuedFunctor> queued_list_;
     };

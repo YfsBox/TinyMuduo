@@ -2,6 +2,7 @@
 // Created by 杨丰硕 on 2023/1/8.
 //
 #include <assert.h>
+#include <sys/eventfd.h>
 #include "EventLoop.h"
 #include "Epoller.h"
 #include "Channel.h"
@@ -15,7 +16,9 @@ EventLoop::EventLoop():
         is_looping_(false),
         is_quit_(false),
         thread_id_(CurrThreadSpace::getCurrThreadId()),
-        epoller_(std::make_unique<Epoller>()){
+        epoller_(std::make_unique<Epoller>()),
+        wakeup_fd_(createWakeupFd()),
+        wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)) {
     if (CurrThreadSpace::LoopInThisThread == nullptr) {
         CurrThreadSpace::LoopInThisThread = this;
     } else {    // 否则就应该出错
@@ -58,4 +61,23 @@ void EventLoop::quit() {
         is_quit_ = true;
     }
 }
+
+int EventLoop::createWakeupFd() {
+    int ret = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (ret < 0) {
+        LOG_ERROR << "The event fd is error in Eventloop";
+    }
+    return ret;
+}
+
+void EventLoop::wakeup() {
+    uint64_t num = 1;
+    auto ret = ::write(wakeup_fd_, &num, sizeof(num));
+    if (ret < 0) {
+        LOG_ERROR << "Wakeup the epoller by write wakeup_fd error";
+    }
+}
+
+
+
 
