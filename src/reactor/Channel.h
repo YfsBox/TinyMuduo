@@ -7,12 +7,19 @@
 
 #include <functional>
 #include <sys/epoll.h>
+#include "EventLoop.h"
 #include "../net/Socket.h"
 
 namespace TinyMuduo {
     class EventLoop;
     class Channel {
     public:
+        enum ChannelState {
+            newChannel = 0,
+            addedChannel,
+            delChannel,
+        };
+
         using CallBackFunc = std::function<void()>;
 
         static const uint32_t NULL_EVENT;
@@ -59,15 +66,45 @@ namespace TinyMuduo {
 
         void setReadable() {
             event_ |= READ_EVENT;
+            update();
         }
 
         void setWritable() {
             event_ |= WRITE_EVENT;
+            update();
+        }
+
+        void update() {
+            state_ = addedChannel;
+            owner_loop_->updateChannel(this);
+        }
+
+        void remove() {
+            owner_loop_->removeChannel(this);
+            state_ = delChannel;    //  处于移除状态
+        }
+
+        bool isInLoop() const {
+            return in_loop_;
         }
 
         void handleEvent();
 
+        ChannelState getState() const {
+            return state_;
+        }
+
+        void setState(ChannelState state) {
+            state_ = state;
+        }
+
+        int getFd() const {
+            return fd_;
+        }
+
     private:
+        bool in_loop_;      // 是否已经加入到loop中
+        ChannelState state_;
         EventLoop *owner_loop_;
         uint32_t event_;    // 驱动事件
         uint32_t revent_; // 返回事件

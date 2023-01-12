@@ -16,7 +16,7 @@ Acceptor::Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr)
     // 需要结合socket以及channel进行调整
     socket_.bindSockAddress(addr);  // 还需要设置为非阻塞I/O
     // 将socket设置为非阻塞I/O
-    channel_.setReadable();
+    channel_.setReadable();         // 除了修改event，还应该对epoller进行修改，而对epoller修改需要间接地通过loop修改
     channel_.setReadCallBack(std::bind(&Acceptor::handleNewConn, this));
 }
 
@@ -30,7 +30,7 @@ void Acceptor::handleNewConn() {
     SockAddress peer_addr;
     auto accept_fd = socket_.accept(&peer_addr);
     if (accept_fd < 0) {
-
+        // 错误的情况
     } else {    // 表示正常返回,执行
         if (newconnection_func_) {
             newconnection_func_(accept_fd, peer_addr);         // 执行回调函数

@@ -28,18 +28,20 @@ namespace TinyMuduo::CurrThreadSpace {
 
 std::atomic<uint32_t> TinyMuduo::Thread::created_thread_num_ = 0;
 
-Thread::Thread(ThreadFunc func):
+Thread::Thread(/*EventLoop *loop,*/ ThreadFunc func):
     is_join_(false),
     is_start(false),
+    // loop_(loop),
     thread_id_(0){
     created_thread_num_++;
     thread_name_ = getDefaultName();
     setFunc(func);
 }
 
-Thread::Thread(Thread::ThreadFunc func, const std::string &name):
+Thread::Thread(/*EventLoop *loop,*/ Thread::ThreadFunc func, const std::string &name):
     is_join_(false),
     is_start(false),
+    // loop_(loop),
     thread_id_(0),
     thread_name_(name){
     created_thread_num_++;

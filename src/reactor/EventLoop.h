@@ -24,6 +24,10 @@ namespace TinyMuduo {
 
         ~EventLoop();
 
+        void updateChannel(Channel *channel);
+
+        void removeChannel(Channel *channel);
+
         void loop(int timeout);
 
         void quit(); // 通常会被外部调用,用来关闭该loop

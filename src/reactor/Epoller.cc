@@ -2,8 +2,11 @@
 // Created by 杨丰硕 on 2023/1/9.
 //
 #include <unistd.h>
+#include <assert.h>
 #include "Epoller.h"
 #include "Channel.h"
+#include "../logger/Logger.h"
+#include "../base/Timestamp.h"
 
 using namespace TinyMuduo;
 
@@ -16,11 +19,15 @@ Epoller::~Epoller() {
     ::close(epoller_fd_);
 }
 
-uint16_t Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
+TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
     auto timeout_millsecond = timeout_second * MillSecondsPerSecond;        // epoll中的单位是mill second，要先转化一下
 
     uint16_t epoll_cnt = ::epoll_wait(epoller_fd_, &*events_.begin(),
                                  static_cast<int>(events_.size()), timeout_millsecond);    // max_size就是一次读取的最大事件数
+    TimeStamp now_time = TimeStamp::getNowTimeStamp();
+
+    LOG_INFO << "epoll_wait return " << epoll_cnt << " events at time "
+    << now_time.getTimeFormatString() << " on epoll_fd " << epoller_fd_ << '\n';
 
     for (size_t i = 0; i < epoll_cnt; ++i) {       // 这里有一个地方需要注意, 要用的是epoll_cnt,而不是直接遍历events
         // 从中读取指针，其中藏着Channel的指针
@@ -28,8 +35,70 @@ uint16_t Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
         channel->setRevent(events_[i].events);
         channel_list.push_back(static_cast<Channel*>(channel));  // 将Channel追加进入
     }
-    return epoll_cnt;
+
+    if (epoll_cnt == events_.size()) {  // 需要扩容,借助vector的可扩容机制
+        events_.resize(2 * epoll_cnt);
+    }
+    return now_time;
 }
+
+void Epoller::updateChannel(Channel *channel) {
+    auto state = channel->getState();
+    int channel_fd = channel->getFd();
+    if (state == Channel::delChannel || state == Channel::newChannel) {
+        if (state == Channel::newChannel) {
+            auto find_channel = channels_map_.find(channel_fd);
+            assert(find_channel == channels_map_.end());        // 不可以之前已经加入过
+            if (find_channel != channels_map_.end()) {
+                channels_map_[channel_fd] = channel;
+            }
+        }
+
+        channel->setState(Channel::addedChannel);
+        update(EPOLL_CTL_ADD, channel);
+
+    } else {
+        assert(channels_map_.find(channel_fd) != channels_map_.end());
+        assert(channel == channels_map_[channel_fd]);
+
+        if (channel->getEvent() == Channel::NULL_EVENT) {  // 如果是空的interested事件
+            update(EPOLL_CTL_DEL, channel);
+            channel->setState(Channel::ChannelState::delChannel);
+        } else {
+            update(EPOLL_CTL_MOD, channel);
+        }
+    }
+
+}
+
+void Epoller::removeChannel(Channel *channel) {
+    auto state = channel->getState();
+    int fd = channel->getFd();
+    assert(state != Channel::newChannel);
+    assert(fd > 0);
+    auto findit = channels_map_.find(fd);
+    assert(findit != channels_map_.end());
+    channels_map_.erase(findit);    // 移除
+
+    if (state == Channel::addedChannel) {
+        update(EPOLL_CTL_DEL, channel);
+    }
+
+    channel->setState(Channel::newChannel);
+}
+
+void Epoller::update(uint32_t op, Channel *channel) {
+    epoll_event event;
+    event.events = channel->getEvent();
+    event.data.ptr = channel;
+
+    int ret = ::epoll_ctl(epoller_fd_, op, channel->getFd(), &event);
+
+    if (ret <  0) {
+        LOG_ERROR << "epoll ctl " << channel->getFd() << " error\n";
+    }
+}
+
 
 
 

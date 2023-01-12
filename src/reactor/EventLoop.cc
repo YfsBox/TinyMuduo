@@ -24,6 +24,16 @@ EventLoop::EventLoop():
 EventLoop::~EventLoop() {
 }
 
+void EventLoop::updateChannel(Channel *channel) {
+
+}
+
+void EventLoop::removeChannel(Channel *channel) {
+
+
+}
+
+
 void EventLoop::loop(int timeout) {
     is_looping_ = true;
     is_quit_ = false;
