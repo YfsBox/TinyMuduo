@@ -41,7 +41,7 @@ namespace TinyMuduo {
 
     private:
 
-        void update(uint32_t op, Channel *channel);
+        void update(int32_t op, Channel *channel);
 
         uint16_t epoller_fd_;
         EventsVector events_;

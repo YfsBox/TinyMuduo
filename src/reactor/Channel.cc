@@ -14,12 +14,17 @@ Channel::Channel(EventLoop *eventLoop, int fd):
     in_loop_(false),
     state_(ChannelState::newChannel),
     owner_loop_(eventLoop),
+    event_(NULL_EVENT),
+    revent_(NULL_EVENT),
     fd_(fd) {}
 
 Channel::Channel():
     in_loop_(false),
     state_(ChannelState::newChannel),
-    fd_(-1){}
+    owner_loop_(nullptr),
+    event_(NULL_EVENT),
+    revent_(NULL_EVENT),
+    fd_(-1) {}
 
 Channel::~Channel() = default;
 

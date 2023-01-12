@@ -39,6 +39,7 @@ Logger::Logger(const char * filename, unsigned int lineno, LogLevel level, const
 
 Logger::~Logger() {     // RAII真是无处不在
     // 将buffer中的内容代入到output函数中
+    stream_ << "\n";
     auto buffer = stream_.getBuffer();
     LoggerOutput(buffer, stream_.getBufferLen());
 }

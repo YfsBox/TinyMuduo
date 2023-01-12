@@ -13,7 +13,8 @@ using namespace TinyMuduo;
 
 Socket::Socket(int fd):fd_(fd) {}
 
-Socket::Socket():fd_(::socket(AF_INET, SOCK_STREAM, 0)) {       // 创建了socket
+Socket::Socket():fd_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC,
+                              IPPROTO_TCP)) {       // 创建了socket
     if (fd_ < 0) {
         printf("Create Socket error\n");
         assert(1);
@@ -61,5 +62,9 @@ int Socket::connect(const SockAddress *sockAddress) {
         printf("connect socket %d error\n", fd_);
     }
     return ret;
+}
+
+void Socket::setNoBlocking() {
+
 }
 

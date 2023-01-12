@@ -66,7 +66,9 @@ namespace TinyMuduo {
         }
 
         void setReadable() {
+            // LOG_DEBUG << "The event is " << event_ << " before";
             event_ |= READ_EVENT;
+            // LOG_DEBUG << "The event is " << event_ << " and the READ_EVENT is " << READ_EVENT;
             update();
         }
 

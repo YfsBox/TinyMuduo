@@ -5,7 +5,6 @@
 #ifndef TINYMUDUO_SOCKET_H
 #define TINYMUDUO_SOCKET_H
 
-
 namespace TinyMuduo {
     class SockAddress;
     class Socket {
@@ -32,6 +31,8 @@ namespace TinyMuduo {
         int accept(SockAddress *sockAddress);   // 接收上面到来的连接
 
         int connect(const SockAddress *sockAddress); // 这个将会用于client
+
+        void setNoBlocking();
 
     private:
         const int fd_;

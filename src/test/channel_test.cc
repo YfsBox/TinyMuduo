@@ -54,6 +54,8 @@ void TestChannel::readingFunc() {
     auto tmpcnt = read_cnt_;
     char buf[5] = "read";
     while (tmpcnt) {
+        LOG_DEBUG << "begin write to test channel " << test_channel_->getFd() << " wait "
+        << interval_millseconds_ << " mills before write";
         std::this_thread::sleep_for(std::chrono::milliseconds(interval_millseconds_));
         ::write(test_channel_->getFd(), buf, sizeof(buf));
         tmpcnt--;
@@ -64,21 +66,31 @@ TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
     // 创建一个Socket及其Channel
     Socket socket;
     ASSERT_TRUE(socket.getFd() > 0);
+    LOG_DEBUG << "Create a loop, and start a loop thread.";
     EventLoop loop;
+    Thread loop_thread([&loop](){
+        loop.loop(-1);
+    });
+    loop_thread.startThread();
+    // 创建channel,设置callback,并且注册到loop
+    LOG_DEBUG << "Create a channel,set a readable callback for it and then start.";
     Channel channel(&loop, socket.getFd());
-    // 首先设置一个周期性触发事件的循环
-    std::atomic_int read_cnt = 10;
     int excepted_cnt = 10;      // 期望的计数为10.
     auto readhandle = [&]() {
         excepted_cnt--;
     };
-    TestChannel testChannel(&channel, 500, 10);
     // 设置channel可读,并且加入到loop
     channel.setReadCallBack(readhandle);
     channel.setReadable();
-    // 启动测试类
+    LOG_DEBUG << "Create a test class and then start it.";
+    // 启动测试类,用来周期性触发channel事件
+    TestChannel testChannel(&channel, 500, 10);
     testChannel.start();
+    LOG_DEBUG << "Wait the test class thread and quit the loop.";
     testChannel.stop();
+    loop.quit();
+    loop_thread.joinThread();
+    LOG_DEBUG << "test end";
 }
 
 TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
@@ -95,8 +107,12 @@ TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
     std::vector<ChannelPtr> channels;
     std::vector<TestChannelPtr> testchannels;
     std::vector<ThreadPtr> testthreads;
-    // 一个事件循环
+    // 一个事件循环，创建一个loop线程并启动
     EventLoop loop;
+    Thread loop_thread([&loop]() {
+        loop.loop(-1);
+    });
+    loop_thread.startThread();
     // 创建50个socket以及channels
     for (size_t i = 0; i < channel_cnt; ++i) {
         sockets.push_back(std::make_unique<Socket>());
@@ -135,6 +151,8 @@ TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
         thread->joinThread();
     }
     // 检查最终的结果
+    loop.quit();
+    loop_thread.joinThread();
     for (auto &test_cnt : testcnts) {
         ASSERT_EQ(test_cnt, 0);
     }
