@@ -7,12 +7,11 @@
 
 using namespace TinyMuduo;
 
-Acceptor::Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr):
+Acceptor::Acceptor(EventLoop *loop, const SockAddress &addr):
     owner_loop_(loop),
     is_listen_(false),
     socket_(),
-    channel_(loop, socket_.getFd()),
-    newconnection_func_(std::move(cb)){
+    channel_(loop, socket_.getFd()){
     // 需要结合socket以及channel进行调整
     socket_.bindSockAddress(addr);  // 还需要设置为非阻塞I/O
     // 将socket设置为非阻塞I/O

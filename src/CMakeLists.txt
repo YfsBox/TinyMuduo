@@ -13,6 +13,7 @@ set(SRCS
         reactor/Epoller.cc
         reactor/EventLoop.cc
         reactor/EventLoopThread.cc
+        reactor/LoopThreadPool.cc
         )
 
 # main library
@@ -40,4 +41,8 @@ target_link_libraries(channel_test tinymuduo gtest)
 
 add_executable(buffer_test test/buffer_test.cc)
 target_link_libraries(buffer_test tinymuduo gtest)
+
+add_executable(loopthread_test test/loopthread_test.cc)
+target_link_libraries(loopthread_test tinymuduo gtest)
+
 

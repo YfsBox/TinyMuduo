@@ -15,6 +15,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                              state_(ConnectionState::Connecting),
                              conn_name_(name),
                              socket_(std::make_unique<Socket>(fd)),
+                             channel_(std::make_unique<Channel>(loop_, fd)),
                              local_addr_(local),
                              peer_addr_(peer) {
     channel_->setReadCallBack(std::bind(&TcpConnection::readHandle, this));

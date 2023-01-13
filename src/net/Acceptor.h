@@ -18,7 +18,7 @@ namespace TinyMuduo {
     public:
         using NewConnectionCb = std::function<void(int, SockAddress &)>;      // 分别表示返回的描述符和地址
 
-        Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr);
+        Acceptor(EventLoop *loop, const SockAddress &addr);
 
         ~Acceptor();
 
