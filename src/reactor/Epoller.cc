@@ -25,7 +25,11 @@ Epoller::~Epoller() {
 }
 
 TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
-    auto timeout_millsecond = timeout_second * MillSecondsPerSecond;        // epoll中的单位是mill second，要先转化一下
+
+    auto timeout_millsecond = timeout_second;        // epoll中的单位是mill second，要先转化一下
+    if (timeout_millsecond > 0) {
+        timeout_millsecond = timeout_second * static_cast<int>(TimeStamp::MillSecondsPerSecond);
+    }           // 如果是-1000就会出现反复频繁触发的问题
 
     uint16_t epoll_cnt = ::epoll_wait(epoller_fd_, &*events_.begin(),
                                  static_cast<int>(events_.size()), timeout_millsecond);    // max_size就是一次读取的最大事件数
@@ -44,6 +48,7 @@ TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
         events_.resize(2 * epoll_cnt);
     }
     return now_time;
+
 }
 
 void Epoller::updateChannel(Channel *channel) {
@@ -60,7 +65,7 @@ void Epoller::updateChannel(Channel *channel) {
 
         channel->setState(Channel::addedChannel);
         update(EPOLL_CTL_ADD, channel);
-        LOG_DEBUG << "add channel(fd: " << channel->getFd() << " ) ok";
+        LOG_DEBUG << "add channel(fd: " << channel->getFd() << ") ok";
 
     } else {
         assert(channels_map_.find(channel_fd) != channels_map_.end());

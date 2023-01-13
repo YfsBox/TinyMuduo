@@ -64,7 +64,7 @@ void TestChannel::readingFunc() {
     }
 }
 
-TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
+TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {        // 相当于loop中的wakeup
     // 创建一个Socket及其Channel
     auto socket_fd = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
     Socket socket(socket_fd);
@@ -79,7 +79,10 @@ TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
     LOG_DEBUG << "Create a channel,set a readable callback for it and then start.";
     Channel channel(&loop, socket.getFd());
     int excepted_cnt = 10;      // 期望的计数为10.
-    auto readhandle = [&]() {
+    auto readhandle = [&excepted_cnt, socket_fd]() {
+        uint64_t num;
+        ssize_t ret = ::read(socket_fd, &num, sizeof(num));
+        ASSERT_TRUE(ret >= 0);
         excepted_cnt--;
     };
     // 设置channel可读,并且加入到loop
@@ -91,7 +94,7 @@ TEST(CHANNEL_TEST, BASIC_CHANNEL_TEST) {
     testChannel.start();
     LOG_DEBUG << "Wait the test class thread and quit the loop.";
     testChannel.stop();
-    loop.quit();
+    loop.wakeupAndQuit();
     loop_thread.joinThread();
     ASSERT_EQ(excepted_cnt, 0);
     LOG_DEBUG << "test end";
@@ -119,28 +122,32 @@ TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
     loop_thread.startThread();
     // 创建50个socket以及channels
     for (size_t i = 0; i < channel_cnt; ++i) {
-        sockets.push_back(std::make_unique<Socket>());
-        auto fd = sockets[i]->getFd();
-        ASSERT_TRUE(fd > 0);
-        channels.push_back(std::make_unique<Channel>(&loop, fd));
+        int tmp_fd = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+        ASSERT_TRUE(tmp_fd > 0);
+        sockets.push_back(std::make_unique<Socket>(tmp_fd));
+        channels.push_back(std::make_unique<Channel>(&loop, tmp_fd));
     }
     // 用于检查次数的变量
     std::vector<size_t> testcnts;
     testcnts.resize(channel_cnt, check_cnt);
     // 将channels就绪
     for (size_t i = 0; i < channel_cnt; ++i) {
-        channels[i]->setReadCallBack([&testcnts, i](){
+        channels[i]->setReadCallBack([&testcnts, i, &channels](){
+            uint64_t num;
+            ssize_t ret = ::read(channels[i]->getFd(), &num, sizeof(num));
+            ASSERT_TRUE(ret >= 0);
             testcnts[i]--;
         });
         channels[i]->setReadable();
     }
     // 创建用于触发channel事件的线程
     for (size_t i = 0; i < channel_cnt; ++i) {
-        std::function<void()> test_func = [&channels,check_cnt,i,write_interval](){
+        std::function<void()> test_func = [&channels, check_cnt, i, write_interval](){
             size_t write_cnt = check_cnt;
             while (write_cnt) {
+                uint64_t num = 1;
                 std::this_thread::sleep_for(std::chrono::milliseconds(write_interval));
-                ::write(channels[i]->getFd(), "1", 1);
+                ::write(channels[i]->getFd(), &num, sizeof(num));
                 write_cnt--;
             }
         };
@@ -155,7 +162,7 @@ TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
         thread->joinThread();
     }
     // 检查最终的结果
-    loop.quit();
+    loop.wakeupAndQuit();
     loop_thread.joinThread();
     for (auto &test_cnt : testcnts) {
         ASSERT_EQ(test_cnt, 0);
@@ -169,3 +176,7 @@ int main(int argc, char* argv[]) {
 }
 
 // epoll不可以监听普通的文件,关于epoll可以监听事件的类型，这个坑等到写完之后再填
+
+// 起初编写测试的问题在于，没有再eventfd的read回调中调用read，这使得epoll所获取的可读事件一直没有被读
+// 从而一直处于可读状态，导致不停地触发，这也是水平触发的特点，即使一个事件没有在第一事件被处理，那么接下来的epoll_wait中
+// 仍然会返回之前没有处理完的事件

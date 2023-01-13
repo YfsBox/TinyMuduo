@@ -22,8 +22,11 @@ EventLoop::EventLoop():
     if (CurrThreadSpace::LoopInThisThread == nullptr) {
         CurrThreadSpace::LoopInThisThread = this;
     } else {    // 否则就应该出错
+        LOG_ERROR << "The Loop in this thread is not nullptr";
         assert(1);
     }
+    wakeup_channel_->setReadCallBack(std::bind(&EventLoop::wakeupHandle, this));
+    wakeup_channel_->setReadable();
 }
 
 EventLoop::~EventLoop() {
@@ -46,9 +49,8 @@ void EventLoop::loop(int timeout) {
         active_channels_.clear();
         auto return_time = epoller_->epoll(-1, active_channels_);
         LOG_DEBUG << "epoller epoll return at time " << return_time.getTimeFormatString()
-        << " and the active channels has" << active_channels_.size();
+        << " and the active channels has " << active_channels_.size();
         for (auto channel : active_channels_) {
-            LOG_DEBUG << "handle the channel whose fd is " << channel->getFd();
             channel->handleEvent();     // 处理返回的事件
         }
     }
@@ -75,6 +77,19 @@ void EventLoop::wakeup() {
     auto ret = ::write(wakeup_fd_, &num, sizeof(num));
     if (ret < 0) {
         LOG_ERROR << "Wakeup the epoller by write wakeup_fd error";
+    }
+}
+
+void EventLoop::wakeupAndQuit() {
+    quit();
+    wakeup();
+}
+
+void EventLoop::wakeupHandle() {
+    uint64_t num;
+    auto ret = ::read(wakeup_fd_, &num, sizeof(num));
+    if (ret < 0) {
+        LOG_ERROR << "Handle the epoller' waker error";
     }
 }
 

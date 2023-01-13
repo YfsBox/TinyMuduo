@@ -34,9 +34,13 @@ namespace TinyMuduo {
 
         void wakeup();
 
+        void wakeupAndQuit();
+
     private:
 
         int createWakeupFd();
+
+        void wakeupHandle();
 
         std::atomic_bool is_looping_;
         std::atomic_bool is_quit_;
