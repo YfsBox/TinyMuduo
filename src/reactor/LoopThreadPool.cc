@@ -30,7 +30,7 @@ EventLoop *LoopThreadPool::getNextLoop() {
         return owner_loop_;
     }
 
-    EventLoop *next_loop = sub_loops_[next_loop_num_].get();
+    EventLoop *next_loop = sub_loops_[next_loop_num_];
     next_loop_num_ = (next_loop_num_ + 1) % thread_size_;
 
     return next_loop;
