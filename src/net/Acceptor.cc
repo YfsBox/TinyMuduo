@@ -20,7 +20,7 @@ Acceptor::Acceptor(EventLoop *loop, NewConnectionCb cb, const SockAddress &addr)
 }
 
 Acceptor::~Acceptor() {
-    channel_.setEvent(Channel::NULL_EVENT);
+    channel_.setEvent(Channel::NULL_EVENT);         // 相当于调用了disablall
 }
 
 void Acceptor::listen() {
@@ -43,7 +43,6 @@ void Acceptor::handleNewConn() {
         }
         // 加入到该循环对应的epoll中
     }
-
 }
 
 // 为什么reactor需要结合非阻塞IO工作????

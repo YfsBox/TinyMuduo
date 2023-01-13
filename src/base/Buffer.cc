@@ -7,6 +7,7 @@
 
 using namespace TinyMuduo;
 // 这里利用iovec可以读取到非连续的多个buffer中的特点，处理了readv到buffer中需要扩容的情况
+// read的话，由于考虑了缓冲区拓展问题，因此需要借助readv处理非连续buffer的能力进行读取
 ssize_t Buffer::read(int fd, int *err) {
     size_t extra_max_len = 65536;
     char extra_buffer[extra_max_len];
@@ -38,3 +39,4 @@ ssize_t Buffer::write(int fd, int *err) {   // 写fd意味着从Buffer的read区
     }
     return ret;
 }
+// 写的话直接调用write进行写就好了

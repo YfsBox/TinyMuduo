@@ -3,8 +3,10 @@
 //
 #include "../base/Timestamp.h"
 #include "../base/Thread.h"
+#include "../base/Threadpool.h"
 #include "../reactor/Epoller.h"
 #include "../reactor/EventLoop.h"
+#include "../reactor/EventLoopThread.h"
 #include <gtest/gtest.h>
 
 using namespace TinyMuduo;
@@ -33,7 +35,7 @@ TEST(EVENTLOOP_TEST, BASIC_EVENTLOOP_TEST) {
 
     auto quit_func = [&]() {    // 用于退出main_loop的loop
         sleep(3);
-        main_loop.quit();       // 退出main_loop的loop
+        main_loop.wakeupAndQuit();       // 退出main_loop的loop
     };
 
     Thread quit_thread(quit_func);
@@ -49,6 +51,31 @@ TEST(EVENTLOOP_TEST, BASIC_EVENTLOOP_TEST) {
     }   // 利用析构函数将子线程进行detach
     printf("the son thread has detached!\n");
 
+}
+
+TEST(EVENTLOOP_TEST, QUEUE_TEST) {
+    std::atomic_int task_cnt = 50;
+    // 开启loop thread
+    {
+        EventLoopThread loop_thread("loop_thread");
+        auto loop = loop_thread.startAndGetEventLoop();
+        ASSERT_TRUE(loop != nullptr);
+        ASSERT_TRUE(loop_thread.isLooping());
+        // 创建线程池，大小为10
+        ThreadPool pool(10, 20);
+        pool.start();
+        for (size_t i = 0; i < 50; ++i) {
+            // 加入50个基于runInLoop的计算任务
+            pool.pushTask([&task_cnt, loop]() {
+                loop->runInLoop([&task_cnt]() {
+                    task_cnt--;
+                });
+            });
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+        pool.stop();        // 等待线程池中的任务都执行完
+    }
+    ASSERT_EQ(task_cnt, 0);
 }
 
 int main(int argc, char* argv[]) {

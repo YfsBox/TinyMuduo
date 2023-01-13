@@ -12,6 +12,7 @@ set(SRCS
         reactor/Channel.cc
         reactor/Epoller.cc
         reactor/EventLoop.cc
+        reactor/EventLoopThread.cc
         )
 
 # main library

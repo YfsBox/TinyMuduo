@@ -7,10 +7,11 @@
 
 #include <functional>
 #include <vector>
-#include <list>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <atomic>
+#include "../base/Thread.h"
 
 namespace TinyMuduo {
     class Epoller;
@@ -36,6 +37,18 @@ namespace TinyMuduo {
 
         void wakeupAndQuit();
 
+        bool isOuterThread() const {
+            return CurrThreadSpace::getCurrThreadId() != thread_id_;        // 如果返回true,那就是外部调用的
+        }
+
+        void assertInThisThread();
+
+        void doQueuedFunctors();
+
+        size_t getQueueSize();
+
+        void runInLoop(QueuedFunctor func);
+
     private:
 
         int createWakeupFd();
@@ -52,7 +65,7 @@ namespace TinyMuduo {
         std::unique_ptr<Channel> wakeup_channel_;
 
         ChannelVector active_channels_;     // 用于存放从epoller中所读取的channels
-        std::list<QueuedFunctor> queued_list_;
+        std::deque<QueuedFunctor> queued_list_;
     };
 }
 

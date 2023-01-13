@@ -17,7 +17,7 @@ EventLoopThread::EventLoopThread(const std::string &name):
 EventLoopThread::~EventLoopThread() {
     if (is_looping_) {
         is_looping_ = false;
-        loop_->quit();
+        loop_->wakeupAndQuit();
         thread_->joinThread();
     }
 }
@@ -44,7 +44,7 @@ void EventLoopThread::threadLoopFunc() {
         loop_ = &eventloop;
         condition_.notify_one();
     }
-    loop_->loop(0);     // 这个loop先暂
+    loop_->loop(-1);     // 这个loop先暂
     // 退出之后
     is_looping_ = false;
     {

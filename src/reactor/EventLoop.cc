@@ -30,6 +30,10 @@ EventLoop::EventLoop():
 }
 
 EventLoop::~EventLoop() {
+    wakeup_channel_->setEvent(Channel::NULL_EVENT);
+    wakeup_channel_->remove();
+    ::close(wakeup_fd_);
+    CurrThreadSpace::LoopInThisThread = nullptr;
 }
 
 void EventLoop::updateChannel(Channel *channel) {
@@ -53,6 +57,7 @@ void EventLoop::loop(int timeout) {
         for (auto channel : active_channels_) {
             channel->handleEvent();     // 处理返回的事件
         }
+        doQueuedFunctors();
     }
 
     is_looping_ = false;
@@ -72,7 +77,7 @@ int EventLoop::createWakeupFd() {
     return ret;
 }
 
-void EventLoop::wakeup() {
+void EventLoop::wakeup() {          // 外部调用和内部调用都可以
     uint64_t num = 1;
     auto ret = ::write(wakeup_fd_, &num, sizeof(num));
     if (ret < 0) {
@@ -85,11 +90,52 @@ void EventLoop::wakeupAndQuit() {
     wakeup();
 }
 
+void EventLoop::assertInThisThread() {          // 如果是外部线程调用的该loop中的方法
+    if (isOuterThread()) {
+        LOG_FATAL << "run not in the eventloop's thread";
+    }
+}
+
 void EventLoop::wakeupHandle() {
     uint64_t num;
     auto ret = ::read(wakeup_fd_, &num, sizeof(num));
     if (ret < 0) {
         LOG_ERROR << "Handle the epoller' waker error";
+    }
+}
+
+void EventLoop::doQueuedFunctors() {
+    assertInThisThread();   // 不可以在外部被调用
+
+    std::deque<QueuedFunctor> tmp_queue;
+    {
+        std::lock_guard<std::mutex> lockGuard(mutex_);
+        tmp_queue.swap(queued_list_);       // 交换过来
+    }
+    // 执行queue中的函数
+    for (const auto &task : tmp_queue) {
+        task();
+    }
+}
+
+size_t EventLoop::getQueueSize() {
+    std::lock_guard<std::mutex> lockGuard(mutex_);
+    return queued_list_.size();
+}
+
+void EventLoop::runInLoop(QueuedFunctor func) {
+    if (func == nullptr) {      // 不可以为空
+        return;
+    }
+    if (isOuterThread()) {
+        // 加入到队列里
+        {
+            std::lock_guard<std::mutex> lockGuard(mutex_);
+            queued_list_.push_back(std::move(func));
+        }
+        wakeup(); // 唤醒loop,loop中将会处理被加入到队列中的函数
+    } else {        // 直接运行
+        func();
     }
 }
 

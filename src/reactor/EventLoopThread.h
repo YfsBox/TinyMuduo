@@ -22,6 +22,10 @@ namespace TinyMuduo {
 
         EventLoop *startAndGetEventLoop();
 
+        bool isLooping() const {
+            return is_looping_;
+        }
+
     private:
 
         void threadLoopFunc();

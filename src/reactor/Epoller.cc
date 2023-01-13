@@ -68,8 +68,8 @@ void Epoller::updateChannel(Channel *channel) {
         LOG_DEBUG << "add channel(fd: " << channel->getFd() << ") ok";
 
     } else {
-        assert(channels_map_.find(channel_fd) != channels_map_.end());
-        assert(channel == channels_map_[channel_fd]);
+        assert(channels_map_.find(channel_fd) == channels_map_.end());
+        assert(channel != channels_map_[channel_fd]);
 
         if (channel->getEvent() == Channel::NULL_EVENT) {  // 如果是空的interested事件
             update(EPOLL_CTL_DEL, channel);
@@ -85,7 +85,6 @@ void Epoller::removeChannel(Channel *channel) {
     auto state = channel->getState();
     int fd = channel->getFd();
     assert(state != Channel::newChannel);
-    assert(fd > 0);
     auto findit = channels_map_.find(fd);
     assert(findit != channels_map_.end());
     channels_map_.erase(findit);    // 移除
