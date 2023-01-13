@@ -37,3 +37,7 @@ target_link_libraries(log_test tinymuduo gtest)
 
 add_executable(channel_test test/channel_test.cc test/test_utils.cc)
 target_link_libraries(channel_test tinymuduo gtest)
+
+add_executable(buffer_test test/buffer_test.cc)
+target_link_libraries(buffer_test tinymuduo gtest)
+

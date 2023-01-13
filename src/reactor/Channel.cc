@@ -38,5 +38,11 @@ void Channel::handleEvent() {           // 这里暂时不考虑悬空引用的�
         if (write_callback_) {
             write_callback_();
         }
+    } else if (revent_) {
+
+
+    } else if (revent_) {
+
+
     }
 }

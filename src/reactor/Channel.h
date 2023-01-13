@@ -39,6 +39,14 @@ namespace TinyMuduo {
         void setWriteCallBack(CallBackFunc cb) {
             write_callback_ = cb;
         }
+
+        void setCloseCallBack(CallBackFunc cb) {
+            close_callback_ = cb;
+        }
+
+        void setErrorCallBack(CallBackFunc cb) {
+            error_callback_ = cb;
+        }
         // 获取事件
         uint32_t getEvent() const {
             return event_;
@@ -115,6 +123,8 @@ namespace TinyMuduo {
         // 读、写事件
         CallBackFunc read_callback_;
         CallBackFunc write_callback_;
+        CallBackFunc close_callback_;
+        CallBackFunc error_callback_;
     };
     //  一般的使用方式:首先设置callback，然后设置writable、readable。
     // writable和readable中有update，update间接地借助loop调用了epoller中的updatechannel

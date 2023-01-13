@@ -23,7 +23,7 @@ ssize_t Buffer::read(int fd, int *err) {
     if (ret < 0) {
         *err = errno;
     } else if (static_cast<size_t>(ret) < writable) {  // 说明没有数据写到extra上
-        write_index_ += ret;
+        write_index_ += ret;        // readv对应的是将内容写入到buffer中，因此移动的是write_index
     } else {
         write_index_ = buffer_.size(); // 对应了readv中读取到buffer上的数据
         append(extra_buffer, ret - writable);
@@ -34,7 +34,7 @@ ssize_t Buffer::read(int fd, int *err) {
 
 ssize_t Buffer::write(int fd, int *err) {   // 写fd意味着从Buffer的read区中读出
     int ret = ::write(fd, peek(), getReadableSize());
-    if (ret < 0) {
+    if (ret < 0) {      // write对应的是读出buffer
         *err = errno;
     }
     return ret;

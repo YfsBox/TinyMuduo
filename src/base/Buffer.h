@@ -67,7 +67,7 @@ namespace TinyMuduo {
             }
         }
 
-        void append(const std::string &content) {
+        void append(const std::string &content) {           // 将一段内容写入到buffer中去,写入到可读buffer中
             append(content.c_str(), content.size());
         }
 
