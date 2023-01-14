@@ -57,6 +57,7 @@ void TcpConnection::writeHandle() {
             // 还需要考虑WriteComplete的情况及其回调函数
         }
     } else {
+        errno = error_no;
         LOG_ERROR << "write error in write handle";
     }
 

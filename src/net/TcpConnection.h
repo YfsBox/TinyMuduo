@@ -84,3 +84,5 @@ namespace TinyMuduo {
 }
 
 #endif //TINYMUDUO_TCPCONNECTION_H
+
+// 还需要了解的是connection会有那些相应的事件,尤其是读、写的过程中又会有那些细节需要注意。

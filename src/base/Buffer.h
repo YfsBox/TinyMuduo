@@ -82,7 +82,24 @@ namespace TinyMuduo {
         ssize_t write(int fd, int *err);
 
     private:
-        void extendBuffer(size_t len); // 扩容函数
+
+        void extendBuffer(size_t len) {
+            if (getWritableSize() + getReadableSize() - PREPEND_BUFFER_SIZE < len) {
+                // 如果buffer中的所有内存碎片加起来都小于len
+                buffer_.resize(write_index_ + len);
+            } else {
+                // 移动到开头
+                size_t readable_size = getReadableSize();
+                std::copy(begin() + read_index_, begin() + write_index_,
+                          begin() + PREPEND_BUFFER_SIZE );
+                read_index_ = PREPEND_BUFFER_SIZE;
+                write_index_ = read_index_ + readable_size;
+            }
+        }
+
+        char *begin() {
+            return const_cast<char*>(&*buffer_.begin());
+        }
 
         const char *begin() const {
             return &*buffer_.begin();
