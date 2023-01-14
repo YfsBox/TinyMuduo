@@ -6,6 +6,17 @@
 #include "Buffer.h"
 
 using namespace TinyMuduo;
+
+const int Buffer::PREPEND_BUFFER_SIZE = 8;
+
+const int Buffer::INIT_BUFFER_SIZE = 1024;
+
+Buffer::Buffer(size_t init_buffer_size):
+    read_index_(PREPEND_BUFFER_SIZE),
+    write_index_(PREPEND_BUFFER_SIZE){
+    buffer_.resize(PREPEND_BUFFER_SIZE + init_buffer_size);
+}
+
 // 这里利用iovec可以读取到非连续的多个buffer中的特点，处理了readv到buffer中需要扩容的情况
 // read的话，由于考虑了缓冲区拓展问题，因此需要借助readv处理非连续buffer的能力进行读取
 ssize_t Buffer::read(int fd, int *err) {

@@ -6,18 +6,19 @@
 
 #include <iostream>
 #include <vector>
+#include "../logger/Logger.h"
 
 namespace TinyMuduo {
     class Buffer {
     public:
 
-        static const int PREPEND_BUFFER_SIZE = 8;
+        static const int PREPEND_BUFFER_SIZE;
 
-        static const int INIT_BUFFER_SIZE = 1024;
+        static const int INIT_BUFFER_SIZE;
 
         explicit Buffer(size_t init_buffer_size = INIT_BUFFER_SIZE);
 
-        ~Buffer();
+        ~Buffer() = default;
 
         const char *peek() const {        // 返回read的开头对应的指针
             return begin() + read_index_;
@@ -55,7 +56,14 @@ namespace TinyMuduo {
             read_index_ = write_index_ = PREPEND_BUFFER_SIZE;
         }
 
-        std::string retrieveAsString(size_t len) {
+        std::string retrieveAsString(size_t len) {      // retrieve从read_index开始读取长度为len的字符串
+            std::string result(peek(), len);        // 同时收缩字符串
+            retrieve(len);
+            return result;
+        }
+
+        std::string retrieveAsStringAll() {
+            size_t len = getReadableSize();
             std::string result(peek(), len);
             retrieve(len);
             return result;
@@ -86,6 +94,7 @@ namespace TinyMuduo {
         void extendBuffer(size_t len) {
             if (getWritableSize() + getReadableSize() - PREPEND_BUFFER_SIZE < len) {
                 // 如果buffer中的所有内存碎片加起来都小于len
+                // LOG_DEBUG << "extend buffer to size " << write_index_ + len;
                 buffer_.resize(write_index_ + len);
             } else {
                 // 移动到开头
