@@ -15,7 +15,7 @@ namespace TinyMuduo {
 
     class EventLoop;
 
-    class ThreadPool;
+    class LoopThreadPool;
 
     class Acceptor;
 
@@ -26,9 +26,12 @@ namespace TinyMuduo {
         // using NewConnectionFunc = std::function<void(int, SockAddress &)>;
         using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
         using ConnectionMap = std::map<std::string, TcpConnectionPtr>;
+        using ConnectionCallback = std::function<void(const TcpConnectionPtr&)>;
+        using MessageCallback = std::function<void(const TcpConnectionPtr&)>;
+        using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 
         TcpServer(const std::string &name, const std::string ip, uint32_t port,
-                  EventLoop *loop, size_t poolsize, size_t queuesize,
+                  size_t io_threads_num, EventLoop *loop, size_t poolsize, size_t queuesize,
                   const std::string pool_name);
 
         ~TcpServer();
@@ -61,6 +64,10 @@ namespace TinyMuduo {
             return port_;
         }
 
+        void setIoThreadNumber(size_t num) {
+            io_threads_num_ = num;
+        }
+
     private:
 
         void newConnFunc(int fd, SockAddress &address);
@@ -69,6 +76,7 @@ namespace TinyMuduo {
 
         std::string ip_;        // 服务器监听的ip以及端口
         uint32_t port_;
+        size_t io_threads_num_;
 
         std::string name_;
         const SockAddress address_;     // 表示的是所监听点的address
@@ -76,11 +84,14 @@ namespace TinyMuduo {
         EventLoop *loop_;        // Epoller的生命其实不为Server所控制
 
         std::unique_ptr<Acceptor> acceptor_;        // 其中Accpetor
-        std::unique_ptr<ThreadPool> pool_;
+        std::unique_ptr<LoopThreadPool> pool_;
 
         uint32_t curr_conn_number_;     // 用来给connection分配name用的标号
         ConnectionMap connection_map_;
-
+        // 下面还应该包含一些TcpConnection需要进行set的函数
+        ConnectionCallback connection_callback_;
+        MessageCallback message_callback_;
+        CloseCallback close_callback_;
     };
 }
 

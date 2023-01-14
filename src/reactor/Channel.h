@@ -65,6 +65,11 @@ namespace TinyMuduo {
             revent_ = revent;
         }
 
+        void setDisable() {
+            event_ = NULL_EVENT;
+            update();
+        }
+
         bool isReadable() const {
             return event_ & READ_EVENT;
         }
@@ -82,6 +87,16 @@ namespace TinyMuduo {
 
         void setWritable() {
             event_ |= WRITE_EVENT;
+            update();
+        }
+
+        void disableReadable() {
+            event_ &= (~READ_EVENT);
+            update();
+        }
+
+        void disableWritable() {
+            event_ &= (~WRITE_EVENT);
             update();
         }
 

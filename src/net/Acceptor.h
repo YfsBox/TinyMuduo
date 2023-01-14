@@ -33,6 +33,10 @@ namespace TinyMuduo {
             newconnection_func_ = std::move(cb);
         }
 
+        int getListeningFd() const {
+            return socket_.getFd();
+        }
+
     private:
         void handleNewConn();
 

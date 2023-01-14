@@ -50,7 +50,7 @@ TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
     return now_time;
 
 }
-
+// 其实这里也还是为了统一接口,这一部分可以分开写,分别写一个DEL、ADD还有MOD
 void Epoller::updateChannel(Channel *channel) {
     auto state = channel->getState();
     int channel_fd = channel->getFd();
@@ -78,7 +78,6 @@ void Epoller::updateChannel(Channel *channel) {
             update(EPOLL_CTL_MOD, channel);
         }
     }
-
 }
 
 void Epoller::removeChannel(Channel *channel) {
