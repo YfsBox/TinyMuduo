@@ -14,12 +14,14 @@ TEST(TIMERQUEUE_TEST, NOREPEATE_TEST) {
     EventLoopThread loop_thread("test1");
     auto loop = loop_thread.startAndGetEventLoop();
 
+    std::atomic_int test_cnt1 = 5;
     for (size_t i = 1; i <= 5; ++i) {
-        loop->runTimertaskAfter( i * TimeStamp::MicroSecondsPerSecond, [i](){
-            LOG_INFO << "the task is " << i << " after start test time";
+        loop->runTimertaskAfter( i * TimeStamp::MicroSecondsPerSecond, [&test_cnt1](){
+            test_cnt1--;
         });
     }
-    std::this_thread::sleep_for(std::chrono::seconds(8));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    ASSERT_EQ(test_cnt1, 0);
 }
 
 int main(int argc, char* argv[]) {

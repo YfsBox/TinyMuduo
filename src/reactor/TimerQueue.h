@@ -107,6 +107,8 @@ namespace TinyMuduo {
 
         void readTimerFd() const;
 
+        void resetTimerFd(TimeStamp expr);
+
         std::vector<SortedEntry> getExprTimers(TimeStamp now);
 
         EventLoop *loop_;

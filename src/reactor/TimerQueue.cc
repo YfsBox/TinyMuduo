@@ -55,6 +55,18 @@ TimerQueue::~TimerQueue() {
     ::close(timer_fd_);
 }
 
+void TimerQueue::resetTimerFd(TimeStamp expr) {
+    itimerspec old_time, new_time;
+    memset(&old_time, 0, sizeof(old_time));
+    memset(&new_time, 0, sizeof(new_time));
+    // 计算时间间隔
+    new_time.it_value = getTimerDiffFromNow(expr);
+    if (::timerfd_settime(timer_fd_, 0, &new_time, &old_time) < 0) {
+        LOG_ERROR << "set timefd error, the new time is {" << new_time.it_value.tv_sec
+                  << "," << new_time.it_value.tv_nsec;
+    }
+}
+
 TimerId TimerQueue::addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCallBack cb) {
     auto timer = new Timer(expr, interval, cb);
     TimerId timerId(timer);
@@ -76,15 +88,7 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
     sorted_list_.insert({expr, std::move(timer_ptr)});
     // 如果有变化就重新调整该描述符
     if (earliest_changed) {
-        itimerspec old_time, new_time;
-        memset(&old_time, 0, sizeof(old_time));
-        memset(&new_time, 0, sizeof(new_time));
-        // 计算时间间隔
-        new_time.it_value = getTimerDiffFromNow(expr);
-        if (::timerfd_settime(timer_fd_, 0, &new_time, &old_time) < 0) {
-            LOG_ERROR << "set timefd error, the new time is {" << new_time.it_value.tv_sec
-            << "," << new_time.it_value.tv_nsec;
-        }
+        resetTimerFd(expr);
     }
     LOG_DEBUG << "the set size is " << timer_list_.size() << " and the earliest is "
     << sorted_list_.begin()->first.getTimeFormatString();
@@ -143,6 +147,11 @@ void TimerQueue::readHandle() {     // 确保只有timer fd所属的一个线程
     for (auto &[stamp, timer]: exprs) {
         timer->run();
     }
+
+    if (!sorted_list_.empty()) {
+        auto new_earliest = sorted_list_.begin()->first;
+        resetTimerFd(new_earliest);
+    }   // 重新调整earliest
 
 }
 
