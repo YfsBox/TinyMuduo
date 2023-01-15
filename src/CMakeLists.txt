@@ -46,4 +46,6 @@ target_link_libraries(buffer_test tinymuduo gtest)
 add_executable(loopthread_test test/loopthread_test.cc)
 target_link_libraries(loopthread_test tinymuduo gtest)
 
+add_executable(timerqueue_test test/timerqueue_test.cc)
+target_link_libraries(timerqueue_test tinymuduo gtest)
 

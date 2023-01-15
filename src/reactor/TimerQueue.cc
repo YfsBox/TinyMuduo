@@ -106,15 +106,18 @@ void TimerQueue::readTimerFd() const {
     }
 }
 
-std::vector<TimerQueue::TimerPtr> TimerQueue::getExprTimers(TimeStamp now) {
-    std::vector<TimerPtr> exprs;
+std::vector<TimerQueue::SortedEntry> TimerQueue::getExprTimers(TimeStamp now) {
+    std::vector<SortedEntry> exprs;
     auto end = sorted_list_.lower_bound(now);
     // 拷贝到exprs中,unique_ptr的所有权就被转移到vector
-    std::copy(sorted_list_.begin(), end, exprs);
+    //std::copy(sorted_list_.begin(), end, std::back_inserter(exprs));
+    for (auto sorted_it = sorted_list_.begin(); sorted_it != end; ++sorted_it) {
+        exprs.emplace_back(sorted_it->first, std::move(sorted_it->second));
+    }
     sorted_list_.erase(sorted_list_.begin(), end);
     // 然后在timer_list中移除
-    for (auto &timer: exprs) {
-        auto findit = timer_list_.find(timer.get());
+    for (auto &[timestamp, timerptr]: exprs) {
+        auto findit = timer_list_.find(timerptr.get());
         if (findit != timer_list_.end()) {
             timer_list_.erase(findit);
         }
@@ -129,7 +132,7 @@ void TimerQueue::readHandle() {     // 确保只有timer fd所属的一个线程
     // 获取其中过期了的结点
     auto exprs = getExprTimers(now_timestamp);
     // 将其中过期的结点都run一下
-    for (auto &timer: exprs) {
+    for (auto &[stamp, timer]: exprs) {
         timer->run();
     }
 

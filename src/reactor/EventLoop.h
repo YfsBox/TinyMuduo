@@ -11,15 +11,24 @@
 #include <memory>
 #include <mutex>
 #include <atomic>
+#include "../base/Timestamp.h"
 #include "../base/Thread.h"
 
 namespace TinyMuduo {
+
     class Epoller;
+
     class Channel;
+
+    class TimerQueue;
+
+    class TimerId;
+
     class EventLoop {
     public:
         using ChannelVector = std::vector<Channel*>;
         using QueuedFunctor = std::function<void()>;
+        using TimerTask = std::function<void()>;
 
         static const int defaultTimeoutMs = 10000;
 
@@ -51,6 +60,10 @@ namespace TinyMuduo {
 
         void runInLoop(QueuedFunctor func);
 
+        TimerId runTimertaskAt(TimeStamp timestamp, TimerTask task);
+
+        TimerId runTimertaskAfter(uint64_t delay, TimerTask task);
+
     private:
 
         int createWakeupFd();
@@ -62,6 +75,7 @@ namespace TinyMuduo {
         const pid_t thread_id_;
         std::mutex mutex_;
         std::unique_ptr<Epoller> epoller_;  // 一个EventLoop是一个Epoller的所有者
+        std::unique_ptr<TimerQueue> timer_queue_;
 
         int wakeup_fd_;
         std::unique_ptr<Channel> wakeup_channel_;

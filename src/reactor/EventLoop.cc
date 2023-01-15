@@ -9,6 +9,7 @@
 #include "../logger/Logger.h"
 #include "../base/Timestamp.h"
 #include "../base/Thread.h"
+#include "../reactor/TimerQueue.h"
 
 using namespace TinyMuduo;
 
@@ -17,8 +18,9 @@ EventLoop::EventLoop():
         is_quit_(false),
         thread_id_(CurrThreadSpace::getCurrThreadId()),
         epoller_(std::make_unique<Epoller>()),
+        timer_queue_(std::make_unique<TimerQueue>(this)),
         wakeup_fd_(createWakeupFd()),
-        wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)) {
+        wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)){
     if (CurrThreadSpace::LoopInThisThread == nullptr) {
         CurrThreadSpace::LoopInThisThread = this;
     } else {    // 否则就应该出错
@@ -139,6 +141,14 @@ void EventLoop::runInLoop(QueuedFunctor func) {
     }
 }
 
+TimerId EventLoop::runTimertaskAfter(uint64_t delay, TimerTask task) {
+    TimeStamp timestamp(TimeStamp::getNowTimeStamp().getMicroSeconds() + delay);
+    return runTimertaskAt(timestamp, std::move(task));
+}
+
+TimerId EventLoop::runTimertaskAt(TimeStamp timestamp, TimerTask task) {
+    return timer_queue_->addTimer(timestamp, 0, std::move(task));
+}
 
 
 

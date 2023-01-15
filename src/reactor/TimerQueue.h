@@ -82,6 +82,7 @@ namespace TinyMuduo {
     public:
         // using TimerEntry = std::pair<TimeStamp, >;
         using TimerPtr = std::unique_ptr<Timer>;
+
         explicit TimerQueue(EventLoop *loop);
 
         ~TimerQueue();
@@ -93,7 +94,7 @@ namespace TinyMuduo {
 
     private:
         using TimerEntry = std::pair<Timer* , uint32_t>;
-        // using SortedEntry = std::pair<TimeStamp, TimerPtr>;
+        using SortedEntry = std::pair<TimeStamp, TimerPtr>;
 
         using TimerList = std::map<Timer*, uint32_t>;
         using SortedList = std::map<TimeStamp, TimerPtr>;
@@ -106,7 +107,7 @@ namespace TinyMuduo {
 
         void readTimerFd() const;
 
-        std::vector<TimerPtr> getExprTimers(TimeStamp now);
+        std::vector<SortedEntry> getExprTimers(TimeStamp now);
 
         EventLoop *loop_;
         const int timer_fd_;
