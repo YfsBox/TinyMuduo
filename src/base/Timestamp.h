@@ -12,11 +12,15 @@ namespace TinyMuduo {
     public:
         TimeStamp() = default;
 
-        explicit TimeStamp(uint64_t mill_seconds);
+        explicit TimeStamp(uint64_t micro_seconds);
 
         ~TimeStamp() = default;
 
         static const uint64_t MillSecondsPerSecond = 1000;
+
+        static const uint64_t MicroSecondsPerSecond = 1000 * 1000;
+
+        static const uint64_t MicroSecondsPerMillSecond = 1000;
 
         static TimeStamp getNowTimeStamp();
 
@@ -25,15 +29,23 @@ namespace TinyMuduo {
         std::string getTimeFormatString() const;
 
         uint64_t getMillSeconds() const {
-            return mill_seconds_;
+            return micro_seconds_ / MicroSecondsPerMillSecond;
+        }
+
+        uint64_t getMicroSeconds() const {
+            return micro_seconds_;
         }
 
         void setMillSeconds(uint64_t mill_second) {
-            mill_seconds_ = mill_second;
+            micro_seconds_ = mill_second * MicroSecondsPerMillSecond;
+        }
+
+        void setMicroSeconds(uint64_t micro_second) {
+            micro_seconds_ = micro_second;
         }
 
     private:
-        uint64_t mill_seconds_;
+        uint64_t micro_seconds_;
     };
 }
 

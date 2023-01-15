@@ -7,13 +7,13 @@
 
 using namespace TinyMuduo;
 
-TimeStamp::TimeStamp(uint64_t mill_seconds): mill_seconds_(mill_seconds) {
+TimeStamp::TimeStamp(uint64_t micro_seconds): micro_seconds_(micro_seconds) {
 }
 
 TimeStamp TimeStamp::getNowTimeStamp() {
     TimeStamp nowStamp;
     auto now_time_point= std::chrono::system_clock::now();
-    nowStamp.setMillSeconds(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>
+    nowStamp.setMillSeconds(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>
             (now_time_point.time_since_epoch()).count()));
     return nowStamp;
 }
@@ -24,7 +24,7 @@ std::string TimeStamp::getTimeString() const {
 }
 
 std::string TimeStamp::getTimeFormatString() const {    // 返回格式化时间对应的字符串
-    time_t seconds = static_cast<time_t>(mill_seconds_ / MillSecondsPerSecond);
+    time_t seconds = static_cast<time_t>(micro_seconds_ / MicroSecondsPerSecond);
     char buf[64] = {0};
 
     struct tm tm_time;
