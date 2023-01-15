@@ -23,7 +23,9 @@ static timespec getTimerDiffFromNow(TimeStamp earliest) {
 Timer::Timer(TimeStamp expr, uint32_t interval, TimerCallBack cb):
     exprition_(expr),
     interval_(interval),
-    timer_callback_(std::move(cb)){}
+    timer_callback_(std::move(cb)){
+
+}
 
 TimerId::TimerId(Timer *timer):
     timer_(timer){
@@ -43,6 +45,12 @@ TimerQueue::TimerQueue(EventLoop *loop):
     }
 }
 
+TimerQueue::~TimerQueue() {
+    timer_channel_.setDisable();
+    timer_channel_.remove();
+    ::close(timer_fd_);
+}
+
 TimerId TimerQueue::addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCallBack cb) {
     auto timer = new Timer(expr, interval, cb);
     TimerId timerId(timer);
@@ -51,7 +59,7 @@ TimerId TimerQueue::addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCall
 }
 
 void TimerQueue::addTimerInLoop(Timer* timer) {
-
+    loop_->assertInThisThread();
     // 然后判断是否导致最早的结点发生变化
     auto expr = timer->getExprition();
     bool earliest_changed = (sorted_list_.empty() ||
@@ -59,8 +67,8 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
     // 插入到两个队列中去
     auto seq = timer->getTimerSeq();
     TimerPtr timer_ptr(timer);
-    sorted_list_.insert({expr, timer});
-    timer_list_.insert({std::move(timer_ptr), seq});
+    timer_list_.insert({timer_ptr.get(), seq});
+    sorted_list_.insert({expr, std::move(timer_ptr)});
     // 如果有变化就重新调整该描述符
     if (earliest_changed) {
         itimerspec old_time, new_time;
@@ -76,7 +84,19 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
 }
 
 void TimerQueue::cancelTimer(TimerId timerId) {
+    loop_->runInLoop(std::bind(&TimerQueue::cancelTimerInLoop, this, timerId));
+}
 
+void TimerQueue::cancelTimerInLoop(TimerId timerId) {
+    loop_->assertInThisThread();
+    // 首先需要先找到该结点
+    TimerEntry find_entry = {timerId.getTimer(), timerId.getTimerSeq()};
+    auto findit = timer_list_.find(find_entry);
+    if (findit != timer_list_.end()) {      // 如果能够找得到,也就是存在得意思,就在集合中删除
+        timer_list_.erase(findit);
+        sorted_list_.erase(timerId.getTimer()->getExprition());
+    }
+    // 找到之后就移除
 }
 
 void TimerQueue::readHandle() {

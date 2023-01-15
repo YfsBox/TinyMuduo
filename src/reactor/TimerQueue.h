@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include <map>
 #include "Channel.h"
 #include "../base/Timestamp.h"
 
@@ -90,11 +91,11 @@ namespace TinyMuduo {
 
 
     private:
-        using TimerEntry = std::pair<TimerPtr , uint32_t>;
-        using SortedEntry = std::pair<TimeStamp, Timer*>;
+        using TimerEntry = std::pair<Timer* , uint32_t>;
+        // using SortedEntry = std::pair<TimeStamp, TimerPtr>;
 
         using TimerList = std::set<TimerEntry>;
-        using SortedList = std::set<SortedEntry>;
+        using SortedList = std::map<TimeStamp, TimerPtr>;
 
         void readHandle();      // 用来给channel绑定的read回调函数
 
