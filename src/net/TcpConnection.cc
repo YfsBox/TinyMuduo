@@ -27,7 +27,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
 TcpConnection::~TcpConnection() {
     channel_->setEvent(Channel::NULL_EVENT);
 }
-
+// 下面的handle相关的，都是需要保证处于io线程中运行的，外部要调用的话必须要runInLoop
 void TcpConnection::readHandle() {
     if (!channel_->isReadable()) {
         return;
@@ -65,16 +65,18 @@ void TcpConnection::writeHandle() {
 
 void TcpConnection::closeHandle() {
     setState(Closed);
-
+    // 由于该connection首先会在Server中的map里移除,会导致引用计数为0,而后续的destroy是一个
+    // 异步的操作,需要将生命周期延长到destroy执行完，所以在这里将其引用计数暂且+1
     channel_->setDisable();
-    close_callback_(shared_from_this());
+    TcpConnectionPtr conn(shared_from_this());
+    close_callback_(conn);
 }
 
 void TcpConnection::errorHandle() {
     LOG_ERROR << "The error handle in the TcpConnection";
 }
 
-void TcpConnection::establish() {
+void TcpConnection::establish() {       // establish和destroy也有放入到io线程中运行的保证
     if (state_ == Connecting) {
         channel_->setReadable();
     }
@@ -87,7 +89,7 @@ void TcpConnection::destroy() {
     connection_callback_(shared_from_this());
 }
 
-void TcpConnection::send(const char *content, size_t len) {
+void TcpConnection::send(const char *content, size_t len) {   // send的实际操作中可能涉及到IO，因此保证其放入到IO线程中操作
     if (state_ == ConnectionState::Connected) {
         if (loop_->isOuterThread()) {
             loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, content, len));
@@ -99,7 +101,7 @@ void TcpConnection::send(const char *content, size_t len) {
 
 void TcpConnection::sendInLoop(const char *content, size_t len) {
     // 首先判断状态
-    if (state_ != ConnectionState::Connected) {
+    if (state_ == ConnectionState::DisConnected) {
         return;
     }
     // 首先尝试直接通过write进行写
@@ -119,6 +121,16 @@ void TcpConnection::sendInLoop(const char *content, size_t len) {
         if (!channel_->isWritable()) {
             channel_->setWritable();
         }
+    }
+}
+
+void TcpConnection::shutdown() {        // 通常在服务端进行半关闭
+
+}
+
+void TcpConnection::shutdownInLoop() {
+    if (!channel_->isWritable()) {
+
     }
 }
 

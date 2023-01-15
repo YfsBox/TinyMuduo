@@ -51,7 +51,7 @@ void EventLoop::loop(int timeout) {
 
     while (!is_quit_) {
         active_channels_.clear();
-        auto return_time = epoller_->epoll(-1, active_channels_);
+        auto return_time = epoller_->epoll(defaultTimeoutMs, active_channels_);
         LOG_DEBUG << "epoller epoll return at time " << return_time.getTimeFormatString()
         << " and the active channels has " << active_channels_.size();
         for (auto channel : active_channels_) {

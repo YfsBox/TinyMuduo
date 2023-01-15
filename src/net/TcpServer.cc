@@ -77,13 +77,26 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     // 创建一个TcpConnection连接
     auto conn = std::make_shared<TcpConnection>(loop_, conn_name, fd,
                                                 local_address, address);
+    connection_map_[conn->getName()] = conn;
     // 创建出来这个之后,还需要执行established相关的回调,这部分回调将会从线程池中找出来一个io线程进行处理
-    conn->setCloseCallback(close_callback_);
+    conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, conn));
     conn->setConnectionCallback(connection_callback_);
     conn->setMessageCallback(message_callback_);         // 设置回调函数
 
     io_loop->runInLoop(std::bind(&TcpConnection::establish, conn));
 
 }
+// 提供给close callback
+void TcpServer::removeConnForClose(const TcpConnectionPtr &conn) {
+    loop_->runInLoop(std::bind(&TcpServer::removeConnForCloseInLoop, this, conn));
+}
 
+void TcpServer::removeConnForCloseInLoop(const TcpConnectionPtr &conn) {
+    auto findit = connection_map_.find(conn->getName());
+    if (findit != connection_map_.end()) {
+        connection_map_.erase(findit);
+        conn->getLoop()->runInLoop(std::bind(&TcpConnection::destroy,
+                                             conn));
+    }
+}
 

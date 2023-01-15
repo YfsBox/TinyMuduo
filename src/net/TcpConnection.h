@@ -27,6 +27,7 @@ namespace TinyMuduo {
             Connecting = 0,
             Connected,
             Closed,
+            DisConnected,
         };
 
         TcpConnection(EventLoop *loop,
@@ -57,19 +58,27 @@ namespace TinyMuduo {
             return loop_;
         }
 
+        std::string getName() const {
+            return conn_name_;
+        }
+
         void establish();
 
         void destroy();
 
         void send(const char *content, size_t len);
 
-        void sendInLoop(const char *content, size_t len);
+        void shutdown();
 
     private:
         void readHandle();
         void writeHandle();
         void errorHandle();
         void closeHandle();
+
+        void sendInLoop(const char *content, size_t len);
+
+        void shutdownInLoop();
 
         EventLoop *loop_;
 

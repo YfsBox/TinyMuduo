@@ -72,6 +72,10 @@ namespace TinyMuduo {
 
         void newConnFunc(int fd, SockAddress &address);
 
+        void removeConnForClose(const TcpConnectionPtr& conn);
+
+        void removeConnForCloseInLoop(const TcpConnectionPtr &conn);
+
         bool is_running_;
 
         std::string ip_;        // 服务器监听的ip以及端口

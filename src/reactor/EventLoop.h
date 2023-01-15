@@ -21,6 +21,8 @@ namespace TinyMuduo {
         using ChannelVector = std::vector<Channel*>;
         using QueuedFunctor = std::function<void()>;
 
+        static const int defaultTimeoutMs = 10000;
+
         EventLoop();
 
         ~EventLoop();
