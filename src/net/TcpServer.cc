@@ -28,11 +28,12 @@ TcpServer::TcpServer(const std::string &name, const std::string ip, uint32_t por
 
 }
 
-
 TcpServer::~TcpServer() {
     // 将连接关闭
     for (auto &[name, conn] : connection_map_) {
-        conn->destroy();        // 调用其中的destroy
+        TcpConnectionPtr connptr(conn);
+        conn.reset();
+        connptr->getLoop()->runInLoop(std::bind(&TcpConnection::destroy, connptr));
     }
 }
 

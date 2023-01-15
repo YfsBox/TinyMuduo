@@ -6,6 +6,7 @@
 #include <sys/eventfd.h>
 #include "../logger/Logger.h"
 #include "../base/Thread.h"
+#include "../reactor/EventLoopThread.h"
 #include "../reactor/Channel.h"
 
 using namespace TinyMuduo;
@@ -167,6 +168,20 @@ TEST(CHANNEL_TEST, MULTI_CHANNEL_TEST) {
     for (auto &test_cnt : testcnts) {
         ASSERT_EQ(test_cnt, 0);
     }
+}
+
+TEST(CHANNEL_TEST, SIMPLE_WRITE_TEST) {         // 这组test点用来观察可写channel在epoller中的反应
+    auto tmp_fd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    EventLoop owner_loop;
+    EventLoopThread loop_thread("test loop thread");
+    auto io_loop = loop_thread.startAndGetEventLoop();
+    auto channel = std::make_shared<Channel>(io_loop, tmp_fd);
+    channel->setWriteCallBack([](){
+        LOG_DEBUG << "A write event happened";
+    });
+    channel->setWritable();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    // 结果表明,在水平触发的epoll中，只要tcp buffer没有满，就一直返回可写事件
 }
 
 int main(int argc, char* argv[]) {

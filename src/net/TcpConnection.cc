@@ -87,3 +87,40 @@ void TcpConnection::destroy() {
     connection_callback_(shared_from_this());
 }
 
+void TcpConnection::send(const char *content, size_t len) {
+    if (state_ == ConnectionState::Connected) {
+        if (loop_->isOuterThread()) {
+            loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, content, len));
+        } else {
+            sendInLoop(content, len);
+        }
+    }
+}
+
+void TcpConnection::sendInLoop(const char *content, size_t len) {
+    // 首先判断状态
+    if (state_ != ConnectionState::Connected) {
+        return;
+    }
+    // 首先尝试直接通过write进行写
+    ssize_t wroten = 0, remain = len;
+    bool has_error = false;
+    if (channel_->isWritable() && write_buffer_.getReadableSize() == 0) {
+        wroten = ::write(channel_->getFd(), content, len);
+        if (wroten >= 0) {
+            remain -= wroten;
+        } else {
+            LOG_ERROR << "the send in loop error";
+            has_error = true;
+        }
+    }
+    if (remain != 0 && !has_error) {        // 还有剩余的话,就先输出到buffer上
+        write_buffer_.append(content + wroten, remain);
+        if (!channel_->isWritable()) {
+            channel_->setWritable();
+        }
+    }
+}
+
+
+

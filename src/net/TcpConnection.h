@@ -53,9 +53,17 @@ namespace TinyMuduo {
             state_ = state;
         }
 
+        EventLoop *getLoop() const {
+            return loop_;
+        }
+
         void establish();
 
         void destroy();
+
+        void send(const char *content, size_t len);
+
+        void sendInLoop(const char *content, size_t len);
 
     private:
         void readHandle();
