@@ -90,8 +90,7 @@ void TimerQueue::cancelTimer(TimerId timerId) {
 void TimerQueue::cancelTimerInLoop(TimerId timerId) {
     loop_->assertInThisThread();
     // 首先需要先找到该结点
-    TimerEntry find_entry = {timerId.getTimer(), timerId.getTimerSeq()};
-    auto findit = timer_list_.find(find_entry);
+    auto findit = timer_list_.find(timerId.getTimer());
     if (findit != timer_list_.end()) {      // 如果能够找得到,也就是存在得意思,就在集合中删除
         timer_list_.erase(findit);
         sorted_list_.erase(timerId.getTimer()->getExprition());
@@ -99,7 +98,40 @@ void TimerQueue::cancelTimerInLoop(TimerId timerId) {
     // 找到之后就移除
 }
 
-void TimerQueue::readHandle() {
+void TimerQueue::readTimerFd() const {
+    uint32_t num;
+    ssize_t ret = ::read(timer_fd_, &num, sizeof(num));
+    if (ret < 0) {
+        LOG_ERROR << "read timer fd error in read handle";
+    }
+}
+
+std::vector<TimerQueue::TimerPtr> TimerQueue::getExprTimers(TimeStamp now) {
+    std::vector<TimerPtr> exprs;
+    auto end = sorted_list_.lower_bound(now);
+    // 拷贝到exprs中,unique_ptr的所有权就被转移到vector
+    std::copy(sorted_list_.begin(), end, exprs);
+    sorted_list_.erase(sorted_list_.begin(), end);
+    // 然后在timer_list中移除
+    for (auto &timer: exprs) {
+        auto findit = timer_list_.find(timer.get());
+        if (findit != timer_list_.end()) {
+            timer_list_.erase(findit);
+        }
+    }
+    return exprs;
+}
+
+void TimerQueue::readHandle() {     // 确保只有timer fd所属的一个线程运行handle
+    // 首先读取timer fd
+    readTimerFd();
+    auto now_timestamp = TimeStamp::getNowTimeStamp();
+    // 获取其中过期了的结点
+    auto exprs = getExprTimers(now_timestamp);
+    // 将其中过期的结点都run一下
+    for (auto &timer: exprs) {
+        timer->run();
+    }
 
 }
 

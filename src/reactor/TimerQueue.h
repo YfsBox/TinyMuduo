@@ -8,6 +8,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <vector>
 #include <set>
 #include <map>
 #include "Channel.h"
@@ -94,7 +95,7 @@ namespace TinyMuduo {
         using TimerEntry = std::pair<Timer* , uint32_t>;
         // using SortedEntry = std::pair<TimeStamp, TimerPtr>;
 
-        using TimerList = std::set<TimerEntry>;
+        using TimerList = std::map<Timer*, uint32_t>;
         using SortedList = std::map<TimeStamp, TimerPtr>;
 
         void readHandle();      // 用来给channel绑定的read回调函数
@@ -102,6 +103,10 @@ namespace TinyMuduo {
         void addTimerInLoop(Timer *timer);
 
         void cancelTimerInLoop(TimerId timerId);
+
+        void readTimerFd() const;
+
+        std::vector<TimerPtr> getExprTimers(TimeStamp now);
 
         EventLoop *loop_;
         const int timer_fd_;
