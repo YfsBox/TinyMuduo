@@ -13,7 +13,7 @@ TimeStamp::TimeStamp(uint64_t micro_seconds): micro_seconds_(micro_seconds) {
 TimeStamp TimeStamp::getNowTimeStamp() {
     TimeStamp nowStamp;
     auto now_time_point= std::chrono::system_clock::now();
-    nowStamp.setMillSeconds(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>
+    nowStamp.setMicroSeconds(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>
             (now_time_point.time_since_epoch()).count()));
     return nowStamp;
 }

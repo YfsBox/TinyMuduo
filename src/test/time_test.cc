@@ -1,19 +1,21 @@
 //
 // Created by 杨丰硕 on 2023/1/8.
 //
-#include "../base/Timestamp.h"
 #include <gtest/gtest.h>
+#include "../base/Timestamp.h"
+#include "../logger/Logger.h"
+
 
 TEST(TIMESTAMP_TEST, SIMPLE_TEST) {
     auto curr_time1 = TinyMuduo::TimeStamp::getNowTimeStamp();
-    std::cout << curr_time1.getTimeFormatString() << '\n';
+    // std::cout << curr_time1.getTimeFormatString() << '\n';
+    LOG_INFO << curr_time1.getMicroSeconds();
     sleep(3);
     auto curr_time2 = TinyMuduo::TimeStamp::getNowTimeStamp();
-    std::cout << curr_time2.getTimeFormatString() << '\n';
-
+    LOG_INFO << curr_time2.getMicroSeconds();
     for (size_t i = 0; i < 5; ++i) {
         auto curr_time_tmp = TinyMuduo::TimeStamp::getNowTimeStamp();
-        std::cout << curr_time_tmp.getTimeFormatString() << '\n';
+        LOG_INFO << curr_time_tmp.getMicroSeconds();
     }
 }
 

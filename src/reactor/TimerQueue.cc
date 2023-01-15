@@ -10,13 +10,13 @@
 using namespace TinyMuduo;
 
 static timespec getTimerDiffFromNow(TimeStamp earliest) {
-    auto micro_seconds = TimeStamp::getNowTimeStamp().getMicroSeconds() -
-            earliest.getMicroSeconds();
+    auto micro_seconds = earliest.getMicroSeconds() -
+            TimeStamp::getNowTimeStamp().getMicroSeconds();
 
     LOG_DEBUG << "The earliest timestamp between now is " << micro_seconds;
     timespec result;
     result.tv_sec = static_cast<time_t>(micro_seconds / TimeStamp::MicroSecondsPerSecond);
-    result.tv_nsec = static_cast<long>(micro_seconds % TimeStamp::MicroSecondsPerSecond % 1000);
+    result.tv_nsec = static_cast<long>((micro_seconds % TimeStamp::MicroSecondsPerSecond) * 1000);
     return result;
 }
 
@@ -29,7 +29,10 @@ Timer::Timer(TimeStamp expr, uint32_t interval, TimerCallBack cb):
 
 TimerId::TimerId(Timer *timer):
     timer_(timer){
-    assert(timer == nullptr);
+    //assert(timer == nullptr);
+    if (timer == nullptr) {
+        LOG_ERROR << "The timer is null";
+    }
     timer_sequence_ = timer->getTimerSeq();
 }
 
@@ -39,6 +42,7 @@ TimerQueue::TimerQueue(EventLoop *loop):
     timer_channel_(loop_, timer_fd_){
     if (timer_fd_ < 0) {
         LOG_FATAL << "create timer fd error";
+        assert(1);
     } else {
         timer_channel_.setReadCallBack(std::bind(&TimerQueue::readHandle, this));
         timer_channel_.setReadable();
@@ -61,6 +65,7 @@ TimerId TimerQueue::addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCall
 void TimerQueue::addTimerInLoop(Timer* timer) {
     loop_->assertInThisThread();
     // 然后判断是否导致最早的结点发生变化
+    LOG_DEBUG << "push the timer which at " << timer->getExprition().getTimeFormatString();
     auto expr = timer->getExprition();
     bool earliest_changed = (sorted_list_.empty() ||
             expr < sorted_list_.begin()->first);
@@ -81,6 +86,8 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
             << "," << new_time.it_value.tv_nsec;
         }
     }
+    LOG_DEBUG << "the set size is " << timer_list_.size() << " and the earliest is "
+    << sorted_list_.begin()->first.getTimeFormatString();
 }
 
 void TimerQueue::cancelTimer(TimerId timerId) {
@@ -99,7 +106,7 @@ void TimerQueue::cancelTimerInLoop(TimerId timerId) {
 }
 
 void TimerQueue::readTimerFd() const {
-    uint32_t num;
+    uint64_t num;       // 这个地方得是2个字节的东西，否则会读取错误
     ssize_t ret = ::read(timer_fd_, &num, sizeof(num));
     if (ret < 0) {
         LOG_ERROR << "read timer fd error in read handle";
@@ -127,6 +134,7 @@ std::vector<TimerQueue::SortedEntry> TimerQueue::getExprTimers(TimeStamp now) {
 
 void TimerQueue::readHandle() {     // 确保只有timer fd所属的一个线程运行handle
     // 首先读取timer fd
+    LOG_DEBUG << "get the read handle";
     readTimerFd();
     auto now_timestamp = TimeStamp::getNowTimeStamp();
     // 获取其中过期了的结点
