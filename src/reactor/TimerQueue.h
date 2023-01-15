@@ -7,6 +7,8 @@
 
 #include <atomic>
 #include <functional>
+#include <memory>
+#include <set>
 #include "Channel.h"
 #include "../base/Timestamp.h"
 
@@ -77,10 +79,35 @@ namespace TinyMuduo {
     class TimerQueue {
     public:
         // using TimerEntry = std::pair<TimeStamp, >;
+        using TimerPtr = std::unique_ptr<Timer>;
+        explicit TimerQueue(EventLoop *loop);
+
+        ~TimerQueue();
+
+        TimerId addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCallBack cb);
+
+        void cancelTimer(TimerId timerId);
+
+
     private:
-        EventLoop *loop;
+        using TimerEntry = std::pair<TimerPtr , uint32_t>;
+        using SortedEntry = std::pair<TimeStamp, Timer*>;
+
+        using TimerList = std::set<TimerEntry>;
+        using SortedList = std::set<SortedEntry>;
+
+        void readHandle();      // 用来给channel绑定的read回调函数
+
+        void addTimerInLoop(Timer *timer);
+
+        void cancelTimerInLoop(TimerId timerId);
+
+        EventLoop *loop_;
         const int timer_fd_;
         Channel timer_channel_;
+
+        TimerList timer_list_;
+        SortedList sorted_list_;
 
     };
 }

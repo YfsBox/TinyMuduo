@@ -14,6 +14,7 @@ set(SRCS
         reactor/EventLoop.cc
         reactor/EventLoopThread.cc
         reactor/LoopThreadPool.cc
+        reactor/TimerQueue.cc
         )
 
 # main library

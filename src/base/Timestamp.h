@@ -47,6 +47,10 @@ namespace TinyMuduo {
     private:
         uint64_t micro_seconds_;
     };
+
+    inline bool operator<(const TimeStamp &lhs, const TimeStamp &rhs) {
+        return lhs.getMicroSeconds() < rhs.getMicroSeconds();
+    }
 }
 
 
