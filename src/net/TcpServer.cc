@@ -61,7 +61,7 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     // 根据fd和address创建一个Connection
     char name_buf[ip_.length() + 32];
     memset(name_buf, 0, sizeof(name_buf));
-    sprintf(name_buf, "#%s:%uz:%uz", ip_.c_str(), port_, curr_conn_number_++);
+    sprintf(name_buf, "#%s:%u:%u", ip_.c_str(), port_, curr_conn_number_++);
     std::string conn_name = name_buf;
     LOG_INFO << "A new connection come(" << name_buf << ")";
     // 获取local addr

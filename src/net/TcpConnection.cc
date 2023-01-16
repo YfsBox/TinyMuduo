@@ -96,6 +96,10 @@ void TcpConnection::destroy() {     //  这个函数需要保证放在TcpConnect
     connection_callback_(shared_from_this());
 }
 
+void TcpConnection::send(const std::string &content) {
+    send(content.c_str(), content.size());
+}
+
 void TcpConnection::send(const char *content, size_t len) {   // send的实际操作中可能涉及到IO，因此保证其放入到IO线程中操作
     if (state_ == ConnectionState::Connected) {
         if (loop_->isOuterThread()) {

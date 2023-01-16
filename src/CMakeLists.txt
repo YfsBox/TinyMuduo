@@ -7,8 +7,11 @@ set(SRCS
         logger/AsyncLogging.cc
         logger/LoggerStream.cc
         logger/Logger.cc
+        net/Acceptor.cc
         net/SockAddress.cc
         net/Socket.cc
+        net/TcpServer.cc
+        net/TcpConnection.cc
         reactor/Channel.cc
         reactor/Epoller.cc
         reactor/EventLoop.cc
@@ -48,4 +51,7 @@ target_link_libraries(loopthread_test tinymuduo gtest)
 
 add_executable(timerqueue_test test/timerqueue_test.cc)
 target_link_libraries(timerqueue_test tinymuduo gtest)
+
+add_executable(server_test test/server_test.cc)
+target_link_libraries(server_test tinymuduo gtest)
 

@@ -58,19 +58,23 @@ void Epoller::updateChannel(Channel *channel) {
         if (state == Channel::newChannel) {
             auto find_channel = channels_map_.find(channel_fd);
             assert(find_channel == channels_map_.end());        // 不可以之前已经加入过
-            if (find_channel != channels_map_.end()) {
+            if (find_channel == channels_map_.end()) {
                 channels_map_[channel_fd] = channel;
             }
         }
-
         channel->setState(Channel::addedChannel);
         update(EPOLL_CTL_ADD, channel);
         LOG_DEBUG << "add channel(fd: " << channel->getFd() << ") ok";
 
     } else {
-        assert(channels_map_.find(channel_fd) == channels_map_.end());
-        assert(channel != channels_map_[channel_fd]);
 
+        if (channels_map_.find(channel_fd) == channels_map_.end()) {
+            LOG_FATAL << "dont have this channel in channel map, channel fd is " << channel->getFd();
+            assert(0);
+        }
+        /*
+        assert(channels_map_.find(channel_fd) != channels_map_.end());
+        assert(channel == channels_map_[channel_fd]);*/
         if (channel->getEvent() == Channel::NULL_EVENT) {  // 如果是空的interested事件
             update(EPOLL_CTL_DEL, channel);
             channel->setState(Channel::ChannelState::delChannel);

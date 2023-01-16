@@ -9,9 +9,12 @@
 #include <map>
 #include <functional>
 #include "../base/Utils.h"
+#include "../reactor/LoopThreadPool.h"
 #include "../net/SockAddress.h"
 
 namespace TinyMuduo {
+
+    class Buffer;
 
     class EventLoop;
 
@@ -27,7 +30,7 @@ namespace TinyMuduo {
         using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
         using ConnectionMap = std::map<std::string, TcpConnectionPtr>;
         using ConnectionCallback = std::function<void(const TcpConnectionPtr&)>;
-        using MessageCallback = std::function<void(const TcpConnectionPtr&)>;
+        using MessageCallback = std::function<void(const TcpConnectionPtr&, Buffer*, TimeStamp)>;
         using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 
         TcpServer(const std::string &name, const std::string ip, uint32_t port,
@@ -65,6 +68,15 @@ namespace TinyMuduo {
 
         void setIoThreadNumber(size_t num) {
             io_threads_num_ = num;
+            pool_->setThreadSize(io_threads_num_);
+        }
+
+        void setConnCb(ConnectionCallback cb) {
+            connection_callback_ = cb;
+        }
+
+        void setMessageCb(MessageCallback cb) {
+            message_callback_ = cb;
         }
 
     private:
@@ -94,7 +106,6 @@ namespace TinyMuduo {
         // 下面还应该包含一些TcpConnection需要进行set的函数
         ConnectionCallback connection_callback_;
         MessageCallback message_callback_;
-        CloseCallback close_callback_;
     };
 }
 

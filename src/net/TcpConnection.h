@@ -66,13 +66,19 @@ namespace TinyMuduo {
             return local_addr_;
         }
 
-        SockAddress getPererAddr() const {
+        SockAddress getPeerAddr() const {
             return peer_addr_;
+        }
+
+        bool isConnected() const {
+            return state_ == ConnectionState::Connected;
         }
 
         void establish();
 
         void destroy();
+
+        void send(const std::string &content);
 
         void send(const char *content, size_t len);
 
