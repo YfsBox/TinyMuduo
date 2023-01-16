@@ -11,7 +11,7 @@
 using namespace TinyMuduo;
 
 TcpServer::TcpServer(const std::string &name, const std::string ip, uint32_t port,
-                     size_t io_threads_num, EventLoop *loop,const std::string pool_name):
+                     size_t io_threads_num, EventLoop *loop,const std::string &pool_name):
                      is_running_(false),
                      ip_(ip),
                      port_(port),
