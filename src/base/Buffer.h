@@ -24,7 +24,7 @@ namespace TinyMuduo {
             return begin() + read_index_;
         }
 
-        const char *writableHeader() const {
+        const char *writableConstHeader() const {
             return begin() + write_index_;
         }
 
@@ -54,6 +54,11 @@ namespace TinyMuduo {
 
         void retrieveAll() {
             read_index_ = write_index_ = PREPEND_BUFFER_SIZE;
+        }
+
+        std::string retrieveUtil(const char *end) {
+            auto len = end - peek();
+            return retrieveAsString(len);
         }
 
         std::string retrieveAsString(size_t len) {      // retrieve从read_index开始读取长度为len的字符串
@@ -89,7 +94,22 @@ namespace TinyMuduo {
 
         ssize_t write(int fd, int *err);
 
+        const char *findCRLF(const char *start, const char *end) {
+            auto crlf = std::search(start, end, CRLF, CRLF + 2);
+            return crlf == writableConstHeader() ? nullptr : crlf;
+        }
+
+        const char *findCRLF(const char *start) {
+            auto crlf = std::search(start, writableConstHeader(), CRLF, CRLF + 2);
+            return crlf == writableConstHeader() ? nullptr : crlf;
+        }
+
+        const char *findCRLF() {
+            return findCRLF(peek());
+        }
+
     private:
+        static const char CRLF[];
 
         void extendBuffer(size_t len) {
             if (getWritableSize() + getReadableSize() - PREPEND_BUFFER_SIZE < len) {

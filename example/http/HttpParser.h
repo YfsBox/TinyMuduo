@@ -6,6 +6,10 @@
 
 #include "HttpRequest.h"
 
+namespace TinyMuduo {
+    class Buffer;
+}
+
 namespace TinyHttp {
     class HttpParser {          // 解析一个buffer从中获取完整的HttpRequest结构
     public:         // 这一部分将会用在TcpConnection中保存
@@ -20,10 +24,26 @@ namespace TinyHttp {
 
         ~HttpParser() = default;
 
+        ParserState getState() const {
+            return state_;
+        }
 
+        bool isFinishAll() const {
+            return state_ == ParserState::ParseFinish;
+        }
 
+        bool parsing(TinyMuduo::Buffer *);
 
     private:
+
+        HttpRequest::Method str2Method(const std::string &mstr);
+
+        void setState(ParserState state) {
+            state_ = state;
+        }
+
+        bool parseRequestLine(const std::string &line);
+
         ParserState state_;
         HttpRequest request_;
     };

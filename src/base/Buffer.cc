@@ -11,6 +11,8 @@ const int Buffer::PREPEND_BUFFER_SIZE = 8;
 
 const int Buffer::INIT_BUFFER_SIZE = 1024;
 
+const char Buffer::CRLF[] = "\r\n";
+
 Buffer::Buffer(size_t init_buffer_size):
     read_index_(PREPEND_BUFFER_SIZE),
     write_index_(PREPEND_BUFFER_SIZE){

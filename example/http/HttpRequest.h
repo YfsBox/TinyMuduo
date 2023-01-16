@@ -20,7 +20,7 @@ namespace TinyHttp {
         };
 
         enum Version {
-            VInvalid, VHttp11
+            VInvalid, VHttp10, VHttp11,
         };
 
         HttpRequest():method_(Method::MInvalid),
@@ -60,6 +60,10 @@ namespace TinyHttp {
 
         void setBody(const std::string &body) {
             body_ = body;
+        }
+
+        void addHeaderKv(const std::string &key, const std::string &value) {
+            headers_[key] = value;
         }
 
     private:
