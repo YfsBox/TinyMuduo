@@ -27,6 +27,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
 TcpConnection::~TcpConnection() {
     channel_->setEvent(Channel::NULL_EVENT);
 }
+// handle本身就是在io线程中进行的
 // 下面的handle相关的，都是需要保证处于io线程中运行的，外部要调用的话必须要runInLoop
 void TcpConnection::readHandle() {
     if (!channel_->isReadable()) {
@@ -36,7 +37,7 @@ void TcpConnection::readHandle() {
     ssize_t retn = read_buffer_.read(channel_->getFd(), &error_no);
     if (retn > 0) {     //正常的读取
         // onMessage
-        message_callback_(shared_from_this());
+        message_callback_(shared_from_this(), &read_buffer_, TimeStamp::getNowTimeStamp());
     } else if (retn == 0) {
         closeHandle();
     } else {
@@ -55,6 +56,9 @@ void TcpConnection::writeHandle() {
         if (write_buffer_.getReadableSize() == 0) {     // 如果改写的东西都已经写完了
             channel_->disableWritable();
             // 还需要考虑WriteComplete的情况及其回调函数
+            if (state_ == ConnectionState::DisConnecting) {
+                shutdownInLoop();       // 执行未完全完成的关闭状态
+            }
         }
     } else {
         errno = error_no;
@@ -63,11 +67,13 @@ void TcpConnection::writeHandle() {
 
 }
 
-void TcpConnection::closeHandle() {
-    setState(Closed);
+void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底的关闭方式
+    LOG_INFO << "close a tcp connection, the fd is " << channel_->getFd();
+    setState(ConnectionState::DisConnected);
     // 由于该connection首先会在Server中的map里移除,会导致引用计数为0,而后续的destroy是一个
     // 异步的操作,需要将生命周期延长到destroy执行完，所以在这里将其引用计数暂且+1
     channel_->setDisable();
+    channel_->remove();
     TcpConnectionPtr conn(shared_from_this());
     close_callback_(conn);
 }
@@ -76,14 +82,15 @@ void TcpConnection::errorHandle() {
     LOG_ERROR << "The error handle in the TcpConnection";
 }
 
-void TcpConnection::establish() {       // establish和destroy也有放入到io线程中运行的保证
+void TcpConnection::establish() {       // 该函数也要保证放在该loop所处的线程中处理
     if (state_ == Connecting) {
+        setState(ConnectionState::Connected);
         channel_->setReadable();
     }
     connection_callback_(shared_from_this());
 }
 
-void TcpConnection::destroy() {
+void TcpConnection::destroy() {     //  这个函数需要保证放在TcpConnection所处的loop中
     channel_->setDisable();
     channel_->remove();
     connection_callback_(shared_from_this());
@@ -123,14 +130,16 @@ void TcpConnection::sendInLoop(const char *content, size_t len) {
         }
     }
 }
-
+// 外部调用
 void TcpConnection::shutdown() {        // 通常在服务端进行半关闭
-
+    // 要考虑到写操作的情况，如果当前不处于writable
+    setState(ConnectionState::DisConnecting);       // 设置成Connecting,writeHandle中会有相应的判断
+    loop_->runInLoop(std::bind(&TcpConnection::shutdownInLoop, this));
 }
 
 void TcpConnection::shutdownInLoop() {
     if (!channel_->isWritable()) {
-
+        Socket::shutdownWrite(channel_->getFd());
     }
 }
 

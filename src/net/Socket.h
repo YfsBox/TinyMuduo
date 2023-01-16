@@ -34,6 +34,8 @@ namespace TinyMuduo {
 
         void setNoBlocking();
 
+        static void shutdownWrite(int fd);
+
     private:
         const int fd_;
     };

@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include "Socket.h"
 #include "SockAddress.h"
+#include "../logger/Logger.h"
 
 using namespace TinyMuduo;
 
@@ -66,5 +67,12 @@ int Socket::connect(const SockAddress *sockAddress) {
 
 void Socket::setNoBlocking() {
 
+}
+
+void Socket::shutdownWrite(int fd) {
+    ssize_t ret = ::shutdown(fd, SHUT_WR);
+    if (ret < 0) {
+        LOG_ERROR << "shut down the fd error " << fd;
+    }
 }
 

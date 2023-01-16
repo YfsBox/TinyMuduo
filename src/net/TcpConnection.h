@@ -20,13 +20,13 @@ namespace TinyMuduo {
     public:
         using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
         using ConnectionCallback = std::function<void(const TcpConnectionPtr&)>;
-        using MessageCallback = std::function<void(const TcpConnectionPtr&)>;
+        using MessageCallback = std::function<void(const TcpConnectionPtr&, Buffer*, TimeStamp)>;
         using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 
         enum ConnectionState {
             Connecting = 0,
             Connected,
-            Closed,
+            DisConnecting,
             DisConnected,
         };
 
@@ -60,6 +60,14 @@ namespace TinyMuduo {
 
         std::string getName() const {
             return conn_name_;
+        }
+
+        SockAddress getLocalAddr() const {
+            return local_addr_;
+        }
+
+        SockAddress getPererAddr() const {
+            return peer_addr_;
         }
 
         void establish();

@@ -11,8 +11,7 @@
 using namespace TinyMuduo;
 
 TcpServer::TcpServer(const std::string &name, const std::string ip, uint32_t port,
-                     size_t io_threads_num, EventLoop *loop, size_t poolsize,
-                     size_t queuesize, const std::string pool_name):
+                     size_t io_threads_num, EventLoop *loop,const std::string pool_name):
                      is_running_(false),
                      ip_(ip),
                      port_(port),
@@ -79,14 +78,14 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
                                                 local_address, address);
     connection_map_[conn->getName()] = conn;
     // 创建出来这个之后,还需要执行established相关的回调,这部分回调将会从线程池中找出来一个io线程进行处理
-    conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, conn));
+    conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, conn));          // 将会在closeHandle中被调用
     conn->setConnectionCallback(connection_callback_);
     conn->setMessageCallback(message_callback_);         // 设置回调函数
 
     io_loop->runInLoop(std::bind(&TcpConnection::establish, conn));
 
 }
-// 提供给close callback
+// 提供给close callback，也就是TcpConnection中的closeHandle
 void TcpServer::removeConnForClose(const TcpConnectionPtr &conn) {
     loop_->runInLoop(std::bind(&TcpServer::removeConnForCloseInLoop, this, conn));
 }
