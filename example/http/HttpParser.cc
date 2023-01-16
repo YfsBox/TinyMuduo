@@ -17,12 +17,13 @@ HttpRequest::Method HttpParser::str2Method(const std::string &mstr) {
     }
 }
 
+
 bool HttpParser::parseRequestLine(const std::string &line) {
     // 以空格为单位逐个分割
     auto start = line.begin();
     for (size_t i = 0; i < 3; ++i) {
         auto space = std::find(start, line.end(), ' ');
-        if (space == line.end()) {
+        if (space == line.end() && i != 2) {
             return false;
         }
         std::string field(start, space);
@@ -44,7 +45,7 @@ bool HttpParser::parseRequestLine(const std::string &line) {
             case 2:{
                 LOG_DEBUG << "version:" << field;
                 // 首先判断长度是否合法
-                if (field.size() != 8 || std::equal(start, space - 1, "HTTP/1.")) {        // 版本号的标准长度
+                if (field.size() != 8 || !std::equal(start, space - 1, "HTTP/1.")) {        // 版本号的标准长度
                     return false;
                 }
                 char lastchar = field.back();

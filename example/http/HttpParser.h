@@ -13,6 +13,9 @@ namespace TinyMuduo {
 namespace TinyHttp {
     class HttpParser {          // 解析一个buffer从中获取完整的HttpRequest结构
     public:         // 这一部分将会用在TcpConnection中保存
+
+        friend class TestParser;
+
         enum ParserState {
             ParseRequestLine = 0,
             ParseHeaders,
