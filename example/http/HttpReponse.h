@@ -31,6 +31,12 @@ namespace TinyHttp {
 
         }
 
+        explicit HttpReponse(bool close):
+            version_(Version::VInvalid),
+            status_code_(HttpStatusCode::Unknown),
+            close_connection_(close){}
+
+
         ~HttpReponse() = default;
 
         void appendToBuffer(TinyMuduo::Buffer *buffer);
@@ -51,7 +57,24 @@ namespace TinyHttp {
             body_ = body;
         }
 
+        void setCloseConnection(bool close) {
+            close_connection_ = close;
+        }
+
+        bool getCloseConnection() const {
+            return close_connection_;
+        }
+
+        void addHeaderKv(const std::string &key, const std::string &value) {
+            head_lines_[key] = value;
+        }
+
+        void setContentType(const std::string &type) {
+            addHeaderKv("Content-Type", type);
+        }
+
     private:
+        bool close_connection_;
         Version version_;
         HttpStatusCode status_code_;
         std::string status_message_;

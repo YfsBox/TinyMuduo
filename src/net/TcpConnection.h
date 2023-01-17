@@ -5,6 +5,7 @@
 #ifndef TINYMUDUO_TCPCONNECTION_H
 #define TINYMUDUO_TCPCONNECTION_H
 
+#include <any>
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -84,6 +85,18 @@ namespace TinyMuduo {
 
         void shutdown();
 
+        const std::any &getConstContext() const {
+            return context_;
+        }
+
+        std::any *getContext() {
+            return &context_;
+        }
+
+        void setContext(const std::any &context) {
+            context_ = context;
+        }
+
     private:
         void readHandle();
         void writeHandle();
@@ -111,6 +124,8 @@ namespace TinyMuduo {
         ConnectionCallback connection_callback_;
         MessageCallback message_callback_;
         CloseCallback close_callback_;
+
+        std::any context_;          // 可以用来维护TcpConnection中的状态变量
     };
 }
 

@@ -42,6 +42,10 @@ namespace TinyHttp {
             return parser_->request_.getHeaderLines();
         }
 
+        bool testFinishAll() const {
+            return parser_->isFinishAll();
+        }
+
     private:
         std::unique_ptr<HttpParser> parser_;
     };
@@ -98,6 +102,8 @@ TEST(HTTPPARSER_TEST, PARSER_PARSEHEADERS_TEST) {
         auto tmp_key = header_keys[i];
         ASSERT_EQ(headlines[tmp_key], header_values[i]);
     }
+
+    ASSERT_EQ(tester.testFinishAll(), true);
 
 }
 

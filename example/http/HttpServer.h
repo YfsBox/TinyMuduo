@@ -16,13 +16,22 @@ namespace TinyMuduo {
 }
 
 namespace TinyHttp {
+    class HttpRequest;
+
+    class HttpReponse;
 
     class HttpServer {
     public:
+        using HttpCallback = std::function<void (const HttpRequest&, HttpReponse*)>;
+        
         HttpServer(const std::string &name, const std::string &ip, uint32_t port,
                    size_t io_threads_num, TinyMuduo::EventLoop *loop, const std::string pool_name);
 
         ~HttpServer() = default;
+
+        void setHttpCallback(HttpCallback cb) {
+            http_callback_ = std::move(cb);
+        }
 
         void start();
 
@@ -32,7 +41,11 @@ namespace TinyHttp {
 
         void onConn(const TinyMuduo::TcpConnection::TcpConnectionPtr &conn);
 
+        void onRequest(const TinyMuduo::TcpConnection::TcpConnectionPtr &conn, const TinyHttp::HttpRequest &request);
+
         TinyMuduo::TcpServer server_;
+
+        HttpCallback http_callback_;
     };
 
 }

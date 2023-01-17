@@ -1,7 +1,10 @@
 //
 // Created by 杨丰硕 on 2023/1/16.
 //
+#include <any>
 #include "HttpServer.h"
+#include "HttpParser.h"
+#include "HttpReponse.h"
 #include "../../src/base/Timestamp.h"
 #include "../../src/base/Buffer.h"
 
@@ -28,10 +31,41 @@ void HttpServer::start() {
 
 void HttpServer::onMessage(const TcpServer::TcpConnectionPtr &conn, Buffer *buffer,
                            TimeStamp timestamp) {
+    HttpParser* parser = std::any_cast<HttpParser>(conn->getContext());
+
+    if (!parser->parsing(buffer)) {     // 中间出现了错误
+        conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
+        conn->shutdown();
+    }
+
+    if (parser->isFinishAll()) {
+        onRequest(conn, parser->getRequest());
+        parser->reset();     // 同时清空
+    }
 
 }
 
 void HttpServer::onConn(const TinyMuduo::TcpConnection::TcpConnectionPtr &conn) {
+    if (conn->isConnected()) {
+        conn->setContext(HttpParser());
+    }
+}
+
+void HttpServer::onRequest(const TinyMuduo::TcpConnection::TcpConnectionPtr &conn, const HttpRequest &request) {
+  // 首先提取出来close,判断是否需要close
+    const std::string& connection = request.lookup("Connection");
+    bool close = (connection == "close") ||
+            (request.getVersion() == HttpRequest::VHttp10 && connection != "Keep-Alive");
+    // 创建出response
+    TinyHttp::HttpReponse response(close);
+    http_callback_(request, &response);      // 根据生成的request设置response的内容
+    Buffer buf;
+    response.appendToBuffer(&buf);    // 加入到buffer中并且send
+    conn->send(std::string(buf.peek(), buf.getReadableSize()));
+
+    if (response.getCloseConnection()) {    // 判断服务端是否需要将连接关闭
+        conn->shutdown();
+    }
 
 }
 

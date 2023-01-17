@@ -37,6 +37,14 @@ namespace TinyHttp {
 
         bool parsing(TinyMuduo::Buffer *);
 
+        void reset() {
+            request_.reset();
+        }
+
+        const HttpRequest &getRequest() const {
+            return request_;
+        }
+
     private:
 
         HttpRequest::Method str2Method(const std::string &mstr);

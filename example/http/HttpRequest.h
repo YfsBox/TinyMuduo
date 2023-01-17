@@ -70,6 +70,22 @@ namespace TinyHttp {
             return headers_;
         }
 
+        void reset() {
+            method_ = Method::MInvalid;
+            version_ = Version::VInvalid;
+            url_.clear();
+            body_.clear();
+            headers_.clear();
+        }
+
+        std::string lookup(const std::string &key) const {
+            auto findit  = headers_.find(key);
+            if (findit != headers_.end()) {
+                return findit->second;
+            }
+            return "";
+        }
+
     private:
 
         Method method_;
