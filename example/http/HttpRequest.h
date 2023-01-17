@@ -66,6 +66,10 @@ namespace TinyHttp {
             headers_[key] = value;
         }
 
+        const HeaderLines &getHeaderLines() const {
+            return headers_;
+        }
+
     private:
 
         Method method_;

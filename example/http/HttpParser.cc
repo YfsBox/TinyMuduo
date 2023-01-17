@@ -33,17 +33,17 @@ bool HttpParser::parseRequestLine(const std::string &line) {
                 if (method == HttpRequest::MInvalid) {
                     return false;
                 }
-                LOG_DEBUG << "method:" << field;
+                // LOG_DEBUG << "method:" << field;
                 request_.setMethod(method);
                 break;
             }
             case 1:{
-                LOG_DEBUG << "url:" << field;
+                // LOG_DEBUG << "url:" << field;
                 request_.setUrl(field);
                 break;
             }
             case 2:{
-                LOG_DEBUG << "version:" << field;
+                // LOG_DEBUG << "version:" << field;
                 // 首先判断长度是否合法
                 if (field.size() != 8 || !std::equal(start, space - 1, "HTTP/1.")) {        // 版本号的标准长度
                     return false;
@@ -74,16 +74,21 @@ bool HttpParser::parsing(TinyMuduo::Buffer *buffer) {
         // 首先以CRLF为边界,解析出一行信息
         auto crlf = buffer->findCRLF();       // 从头开始找吧
         if (crlf == nullptr) {      // 已经找不到crlf了
+            // LOG_DEBUG << "can't find crlf";
             break;
         }
         std::string line(buffer->retrieveUtil(crlf));       // 获取这一行消息
+        buffer->retrieve(2); // 将多余的crlf过滤掉
+
         switch (state_) {
             case ParserState::ParseRequestLine: {
                 bool parse_ok = parseRequestLine(line);
                 if (parse_ok) {
+                    // LOG_DEBUG << "parse request line ok";
                     setState(ParserState::ParseHeaders);
                 } else {
                     is_ok = false;
+                    parsing = false;
                 }
                 break;
             }
@@ -91,12 +96,12 @@ bool HttpParser::parsing(TinyMuduo::Buffer *buffer) {
                 // 首先分割出冒号
                 auto colon = std::find(line.begin(), line.end(), ':');
                 if (colon == line.end()) {      // 如果找不到冒号
+                    // LOG_DEBUG << "parse header finish, and the line is " << line;
                     setState(ParserState::ParseBody);
-
                 } else {        // 如果能够找到冒号
                     std::string key(line.begin(), colon);
                     std::string value(colon + 1, line.end());
-                    LOG_DEBUG << "{" << key << "," << value << "}";     // 调试看结果
+                    // LOG_DEBUG << "{" << key << "," << value << "}";     // 调试看结果
                     request_.addHeaderKv(key, value);
                 }
                 break;
