@@ -69,6 +69,16 @@ void Socket::setNoBlocking() {
 
 }
 
+void Socket::setReuseAddr(bool on) {
+    int optval = on ? 1 : 0;
+    ::setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+}
+
+void Socket::setReusePort(bool on) {
+    int optval = on ? 1 : 0;
+    ::setsockopt(fd_, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+}
+
 void Socket::shutdownWrite(int fd) {
     ssize_t ret = ::shutdown(fd, SHUT_WR);
     if (ret < 0) {

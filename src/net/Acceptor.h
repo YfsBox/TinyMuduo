@@ -45,6 +45,7 @@ namespace TinyMuduo {
         Socket socket_;
         Channel channel_;
         NewConnectionCb newconnection_func_;
+        int idel_fd_;
     };
 }
 

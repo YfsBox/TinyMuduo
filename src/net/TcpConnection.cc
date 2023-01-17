@@ -25,7 +25,8 @@ TcpConnection::TcpConnection(EventLoop *loop,
 }
 
 TcpConnection::~TcpConnection() {
-    channel_->setEvent(Channel::NULL_EVENT);
+    // channel_->setDisable();
+    LOG_INFO << "The TcpConnection " << channel_->getFd() << " removed";
 }
 // handle本身就是在io线程中进行的
 // 下面的handle相关的，都是需要保证处于io线程中运行的，外部要调用的话必须要runInLoop
@@ -73,7 +74,7 @@ void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底
     // 由于该connection首先会在Server中的map里移除,会导致引用计数为0,而后续的destroy是一个
     // 异步的操作,需要将生命周期延长到destroy执行完，所以在这里将其引用计数暂且+1
     channel_->setDisable();
-    channel_->remove();         // 需要移除channel吗
+    // channel_->remove();         // 需要移除channel吗
     TcpConnectionPtr conn(shared_from_this());
     close_callback_(conn);
 }
@@ -85,6 +86,7 @@ void TcpConnection::errorHandle() {
 void TcpConnection::establish() {       // 该函数也要保证放在该loop所处的线程中处理
     if (state_ == Connecting) {
         setState(ConnectionState::Connected);
+        // channel_->tie(shared_from_this());
         channel_->setReadable();
     }
     connection_callback_(shared_from_this());
@@ -92,7 +94,7 @@ void TcpConnection::establish() {       // 该函数也要保证放在该loop所
 
 void TcpConnection::destroy() {     //  这个函数需要保证放在TcpConnection所处的loop中
     channel_->setDisable();
-    // channel_->remove();
+    channel_->remove();
     connection_callback_(shared_from_this());
 }
 
@@ -118,7 +120,7 @@ void TcpConnection::sendInLoop(const char *content, size_t len) {
     // 首先尝试直接通过write进行写
     ssize_t wroten = 0, remain = len;
     bool has_error = false;
-    if (channel_->isWritable() && write_buffer_.getReadableSize() == 0) {
+    if (!channel_->isWritable() && write_buffer_.getReadableSize() == 0) {
         wroten = ::write(channel_->getFd(), content, len);
         if (wroten >= 0) {
             remain -= wroten;

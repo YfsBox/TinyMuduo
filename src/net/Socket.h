@@ -34,6 +34,10 @@ namespace TinyMuduo {
 
         void setNoBlocking();
 
+        void setReuseAddr(bool on);
+
+        void setReusePort(bool on);
+
         static void shutdownWrite(int fd);
 
     private:

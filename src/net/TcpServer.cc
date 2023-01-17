@@ -15,9 +15,9 @@ TcpServer::TcpServer(const std::string &name, const std::string ip, uint32_t por
                      is_running_(false),
                      ip_(ip),
                      port_(port),
+                     io_threads_num_(io_threads_num),
                      name_(name),
                      address_(ip, port),
-                     io_threads_num_(io_threads_num),
                      loop_(loop),
                      acceptor_(std::make_unique<Acceptor>(loop_, address_)),
                      pool_(std::make_unique<LoopThreadPool>(loop_, pool_name)),
@@ -74,7 +74,7 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     }
     SockAddress local_address(localaddr);
     // 创建一个TcpConnection连接
-    auto conn = std::make_shared<TcpConnection>(loop_, conn_name, fd,
+    auto conn = std::make_shared<TcpConnection>(io_loop, conn_name, fd,
                                                 local_address, address);
     connection_map_[conn->getName()] = conn;
     // 创建出来这个之后,还需要执行established相关的回调,这部分回调将会从线程池中找出来一个io线程进行处理
@@ -98,4 +98,7 @@ void TcpServer::removeConnForCloseInLoop(const TcpConnectionPtr &conn) {
                                              conn));
     }
 }
+
+// 如果client端关闭连接,server端就会触发closeHandle,
+// 如果这个时候还会有send的话,
 

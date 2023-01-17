@@ -16,7 +16,8 @@ Channel::Channel(EventLoop *eventLoop, int fd):
     owner_loop_(eventLoop),
     event_(NULL_EVENT),
     revent_(NULL_EVENT),
-    fd_(fd) {}
+    fd_(fd),
+    tied_(false){}
 
 Channel::Channel():
     in_loop_(false),
@@ -29,20 +30,42 @@ Channel::Channel():
 Channel::~Channel() = default;
 
 void Channel::handleEvent() {           // 这里暂时不考虑悬空引用的情况
-    // 根据handle来判断
+    /*if(tied_) {
+        std::shared_ptr<void> guard;
+        guard = tie_.lock();
+        if(guard) {
+            handleEventWithGuard();
+        }
+    } else {
+        handleEventWithGuard();
+    }*/
+    handleEventWithGuard();
+}
+
+void Channel::handleEventWithGuard() {
     if (revent_ & READ_EVENT) {     // 可读事件
         if (read_callback_) {
             read_callback_();
         }
-    } else if (revent_ & WRITE_EVENT) {     // 可写事件
+    }
+    if (revent_ & WRITE_EVENT) {     // 可写事件
         if (write_callback_) {
             write_callback_();
         }
-    } else if (revent_) {
-
-
-    } else if (revent_) {
-
-
     }
+    if (revent_ & EPOLLERR) {
+        if (error_callback_) {
+            error_callback_();
+        }
+    }
+    if ((revent_ & EPOLLHUP) && !(revent_ & EPOLLIN)) {
+        if (close_callback_) {
+            close_callback_();
+        }
+    }
+}
+
+void Channel::tie(const std::shared_ptr<void> &obj) {
+    tie_ = obj;
+    tied_ = true;
 }

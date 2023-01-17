@@ -17,7 +17,7 @@ extern char favicon[555];
 bool benchmark = true;
 
 void onRequest(const TinyHttp::HttpRequest& req, TinyHttp::HttpReponse* resp) {
-    LOG_INFO << "Headers " << req.getMethod() << " " << req.getUrl();
+    // LOG_INFO << "Headers " << req.getMethod() << " " << req.getUrl();
     if (!benchmark) {
         const std::map<std::string, std::string>& headers = req.getHeaderLines();
         for (const auto& header : headers) {
@@ -59,8 +59,8 @@ int main(int argc, char* argv[])
         benchmark = true;
         numThreads = atoi(argv[1]);
     }
-    TinyMuduo::AsyncLogging::getInstance().init(3, "server_test_log");
-    TinyMuduo::AsyncLogging::getInstance().start();
+    /*TinyMuduo::AsyncLogging::getInstance().init(3, "server_test_log");
+    TinyMuduo::AsyncLogging::getInstance().start();*/
 
     TinyMuduo::EventLoop loop;
     TinyHttp::HttpServer server("test_server", "0.0.0.0", 12234, numThreads, &loop, "dummy");

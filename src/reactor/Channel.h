@@ -116,6 +116,8 @@ namespace TinyMuduo {
 
         void handleEvent();
 
+        void handleEventWithGuard();
+
         ChannelState getState() const {
             return state_;
         }
@@ -128,6 +130,8 @@ namespace TinyMuduo {
             return fd_;
         }
 
+        void tie(const std::shared_ptr<void> &obj);
+
     private:
         bool in_loop_;      // 是否已经加入到loop中
         ChannelState state_;
@@ -136,6 +140,9 @@ namespace TinyMuduo {
         uint32_t revent_; // 返回事件
         const int fd_;    // 其实Channel并不是直接暴漏的，而是被封装到了channel里
         // 读、写事件
+        std::weak_ptr<void> tie_;
+        bool tied_;
+
         CallBackFunc read_callback_;
         CallBackFunc write_callback_;
         CallBackFunc close_callback_;

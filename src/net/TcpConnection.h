@@ -9,6 +9,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include "../net/Socket.h"
 #include "../base/Buffer.h"
 #include "../net/SockAddress.h"
 
@@ -95,6 +96,10 @@ namespace TinyMuduo {
 
         void setContext(const std::any &context) {
             context_ = context;
+        }
+
+        int getFd() const {
+            return socket_->getFd();
         }
 
     private:
