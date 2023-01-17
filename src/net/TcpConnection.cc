@@ -26,7 +26,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
 
 TcpConnection::~TcpConnection() {
     // channel_->setDisable();
-    LOG_INFO << "The TcpConnection " << channel_->getFd() << " removed";
+    // LOG_INFO << "The TcpConnection " << channel_->getFd() << " removed";
 }
 // handle本身就是在io线程中进行的
 // 下面的handle相关的，都是需要保证处于io线程中运行的，外部要调用的话必须要runInLoop
@@ -69,13 +69,15 @@ void TcpConnection::writeHandle() {
 }
 
 void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底的关闭方式
-    LOG_INFO << "close a tcp connection, the fd is " << channel_->getFd();
+    // LOG_INFO << "close a tcp connection, the fd is " << channel_->getFd(); /*<< " the use cnt is "
+    //<< shared_from_this().use_count() << " and " << shared_from_this().use_count();*/
     setState(ConnectionState::DisConnected);
     // 由于该connection首先会在Server中的map里移除,会导致引用计数为0,而后续的destroy是一个
     // 异步的操作,需要将生命周期延长到destroy执行完，所以在这里将其引用计数暂且+1
     channel_->setDisable();
     // channel_->remove();         // 需要移除channel吗
     TcpConnectionPtr conn(shared_from_this());
+    // LOG_DEBUG << "the conn use cnt is " << conn.use_count();
     close_callback_(conn);
 }
 

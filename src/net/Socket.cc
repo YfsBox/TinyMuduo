@@ -23,6 +23,7 @@ Socket::Socket():fd_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXE
 }
 
 Socket::~Socket() {
+    // LOG_DEBUG << "close fd " << fd_;
     ::close(fd_);
 }
 
@@ -44,7 +45,7 @@ int Socket::accept(SockAddress *sockAddress) {
         sockAddress->setSockaddr(addr);
     } else {
         // 这种情况是accept出错的情况
-        printf("The accept error\n");
+        LOG_FATAL << "the accept error, error no is " << errno;
     }
     return connfd;
 }
@@ -52,7 +53,7 @@ int Socket::accept(SockAddress *sockAddress) {
 int Socket::listen() {
     int ret = ::listen(fd_, 1024);
     if (ret < 0) {
-        printf("listen socket %d error\n", fd_);
+        LOG_FATAL << "the listen error, error no is " << errno;
     }
     return ret;
 }
@@ -60,7 +61,7 @@ int Socket::listen() {
 int Socket::connect(const SockAddress *sockAddress) {
     int ret = ::connect(fd_, sockAddress->getSockAddr(), sockAddress->getSocketLen());
     if (ret < 0) {
-        printf("connect socket %d error\n", fd_);
+        LOG_FATAL << "the connect error, error no is " << errno;
     }
     return ret;
 }

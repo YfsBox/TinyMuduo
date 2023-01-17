@@ -63,7 +63,6 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     memset(name_buf, 0, sizeof(name_buf));
     sprintf(name_buf, "#%s:%u:%u", ip_.c_str(), port_, curr_conn_number_++);
     std::string conn_name = name_buf;
-    // LOG_INFO << "A new connection come(" << name_buf << ")";
     // 获取local addr
     sockaddr_in localaddr;
     bzero(&localaddr, sizeof(localaddr));
@@ -77,8 +76,10 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     auto conn = std::make_shared<TcpConnection>(io_loop, conn_name, fd,
                                                 local_address, address);
     connection_map_[conn->getName()] = conn;
+    // LOG_INFO << "A new connection come(" << name_buf << ")" << " the use cnt is " << conn.use_count();
     // 创建出来这个之后,还需要执行established相关的回调,这部分回调将会从线程池中找出来一个io线程进行处理
-    conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, conn));          // 将会在closeHandle中被调用
+    conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, std::placeholders::_1));          // 将会在closeHandle中被调用
+    // conn->setCloseCallback(std::bind(&TcpServer::removeConnForClose, this, conn))    这里因为有个引用技术减不到1而导致资源释放不了的
     conn->setConnectionCallback(connection_callback_);
     conn->setMessageCallback(message_callback_);         // 设置回调函数
 
@@ -91,12 +92,16 @@ void TcpServer::removeConnForClose(const TcpConnectionPtr &conn) {
 }
 
 void TcpServer::removeConnForCloseInLoop(const TcpConnectionPtr &conn) {
+    auto tmp_fd = conn->getFd();
+    // LOG_DEBUG << "the use count is " << conn.use_count() << " at begin in removecb";
     auto findit = connection_map_.find(conn->getName());
     if (findit != connection_map_.end()) {
         connection_map_.erase(findit);
         conn->getLoop()->runInLoop(std::bind(&TcpConnection::destroy,
                                              conn));
     }
+    /*LOG_DEBUG << "the use count is " << conn.use_count() << " the fd is "
+    << tmp_fd;*/
 }
 
 // 如果client端关闭连接,server端就会触发closeHandle,

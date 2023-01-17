@@ -31,7 +31,7 @@ void HttpServer::start() {
 
 void HttpServer::onMessage(const TcpServer::TcpConnectionPtr &conn, Buffer *buffer,
                            TimeStamp timestamp) {
-    LOG_INFO << "the conn fd is " << conn->getFd() << " in onMessage";
+    // LOG_INFO << "the conn fd is " << conn->getFd() << " in onMessage";
     HttpParser* parser = std::any_cast<HttpParser>(conn->getContext());         // 此时已经
 
     if (!parser->parsing(buffer)) {     // 中间出现了错误
@@ -49,7 +49,7 @@ void HttpServer::onMessage(const TcpServer::TcpConnectionPtr &conn, Buffer *buff
 
 void HttpServer::onConn(const TinyMuduo::TcpConnection::TcpConnectionPtr &conn) {
     if (conn->isConnected()) {      // 通过状态Connected还是DisConnected来区分Conn回调中的行为
-        LOG_INFO << "the Conn fd " << conn->getFd() << " set the Context";
+        // LOG_INFO << "the Conn fd " << conn->getFd() << " set the Context";
         conn->setContext(HttpParser());
     }
 }
