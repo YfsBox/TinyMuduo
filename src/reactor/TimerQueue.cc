@@ -13,7 +13,7 @@ static timespec getTimerDiffFromNow(TimeStamp earliest) {
     auto micro_seconds = earliest.getMicroSeconds() -
             TimeStamp::getNowTimeStamp().getMicroSeconds();
 
-    LOG_DEBUG << "The earliest timestamp between now is " << micro_seconds;
+    // LOG_DEBUG << "The earliest timestamp between now is " << micro_seconds;
     timespec result;
     result.tv_sec = static_cast<time_t>(micro_seconds / TimeStamp::MicroSecondsPerSecond);
     result.tv_nsec = static_cast<long>((micro_seconds % TimeStamp::MicroSecondsPerSecond) * 1000);
@@ -77,7 +77,7 @@ TimerId TimerQueue::addTimer(TimeStamp expr, uint32_t interval, Timer::TimerCall
 void TimerQueue::addTimerInLoop(Timer* timer) {
     loop_->assertInThisThread();
     // 然后判断是否导致最早的结点发生变化
-    LOG_DEBUG << "push the timer which at " << timer->getExprition().getTimeFormatString();
+    // LOG_DEBUG << "push the timer which at " << timer->getExprition().getTimeFormatString();
     auto expr = timer->getExprition();
     bool earliest_changed = (sorted_list_.empty() ||
             expr < sorted_list_.begin()->first);
@@ -90,8 +90,8 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
     if (earliest_changed) {
         resetTimerFd(expr);
     }
-    LOG_DEBUG << "the set size is " << timer_list_.size() << " and the earliest is "
-    << sorted_list_.begin()->first.getTimeFormatString();
+    /*LOG_DEBUG << "the set size is " << timer_list_.size() << " and the earliest is "
+    << sorted_list_.begin()->first.getTimeFormatString();*/
 }
 
 void TimerQueue::cancelTimer(TimerId timerId) {
@@ -138,7 +138,7 @@ std::vector<TimerQueue::SortedEntry> TimerQueue::getExprTimers(TimeStamp now) {
 
 void TimerQueue::readHandle() {     // 确保只有timer fd所属的一个线程运行handle
     // 首先读取timer fd
-    LOG_DEBUG << "get the read handle";
+    // LOG_DEBUG << "get the read handle";
     readTimerFd();
     auto now_timestamp = TimeStamp::getNowTimeStamp();
     // 获取其中过期了的结点

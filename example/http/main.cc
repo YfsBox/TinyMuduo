@@ -3,6 +3,7 @@
 //
 #include "../../src/reactor/EventLoop.h"
 #include "../../src/logger/Logger.h"
+#include "../../src/logger/AsyncLogging.h"
 #include "HttpRequest.h"
 #include "HttpReponse.h"
 #include "HttpServer.h"
@@ -58,10 +59,15 @@ int main(int argc, char* argv[])
         benchmark = true;
         numThreads = atoi(argv[1]);
     }
+    TinyMuduo::AsyncLogging::getInstance().init(3, "server_test_log");
+    TinyMuduo::AsyncLogging::getInstance().start();
+
     TinyMuduo::EventLoop loop;
     TinyHttp::HttpServer server("test_server", "0.0.0.0", 12234, numThreads, &loop, "dummy");
+
     server.setHttpCallback(onRequest);
     server.start();
+
     loop.loop(-1);
 }
 

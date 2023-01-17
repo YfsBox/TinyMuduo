@@ -16,7 +16,7 @@ Epoller::Epoller():epoller_fd_(::epoll_create1(EPOLL_CLOEXEC)) {    // 其中EPO
     if (epoller_fd_ < 0) {
         LOG_ERROR << "epoll fd create error";
     }
-    LOG_DEBUG << "Epoller create epoller fd is " << epoller_fd_;
+    // LOG_DEBUG << "Epoller create epoller fd is " << epoller_fd_;
     events_.resize(INIT_EVENT_SIZE);    //  设置event数组
 }
 
@@ -64,7 +64,7 @@ void Epoller::updateChannel(Channel *channel) {
         }
         channel->setState(Channel::addedChannel);
         update(EPOLL_CTL_ADD, channel);
-        LOG_DEBUG << "add channel(fd: " << channel->getFd() << ") ok";
+       // LOG_DEBUG << "add channel(fd: " << channel->getFd() << ") ok";
 
     } else {
 

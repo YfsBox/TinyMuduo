@@ -32,9 +32,10 @@ namespace TinyHttp {
         }
 
         explicit HttpReponse(bool close):
+            close_connection_(close),
             version_(Version::VInvalid),
-            status_code_(HttpStatusCode::Unknown),
-            close_connection_(close){}
+            status_code_(HttpStatusCode::Unknown)
+            {}
 
 
         ~HttpReponse() = default;

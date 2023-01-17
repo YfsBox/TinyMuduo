@@ -39,6 +39,7 @@ void HttpServer::onMessage(const TcpServer::TcpConnectionPtr &conn, Buffer *buff
     }
 
     if (parser->isFinishAll()) {
+        // LOG_DEBUG << "the request is finished looking";
         onRequest(conn, parser->getRequest());
         parser->reset();     // 同时清空
     }

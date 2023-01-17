@@ -73,7 +73,7 @@ void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底
     // 由于该connection首先会在Server中的map里移除,会导致引用计数为0,而后续的destroy是一个
     // 异步的操作,需要将生命周期延长到destroy执行完，所以在这里将其引用计数暂且+1
     channel_->setDisable();
-    channel_->remove();
+    channel_->remove();         // 需要移除channel吗
     TcpConnectionPtr conn(shared_from_this());
     close_callback_(conn);
 }
@@ -92,7 +92,7 @@ void TcpConnection::establish() {       // 该函数也要保证放在该loop所
 
 void TcpConnection::destroy() {     //  这个函数需要保证放在TcpConnection所处的loop中
     channel_->setDisable();
-    channel_->remove();
+    // channel_->remove();
     connection_callback_(shared_from_this());
 }
 

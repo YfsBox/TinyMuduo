@@ -97,13 +97,17 @@ bool HttpParser::parsing(TinyMuduo::Buffer *buffer) {
                 auto colon = std::find(line.begin(), line.end(), ':');
                 if (colon == line.end()) {      // 如果找不到冒号
                     // LOG_DEBUG << "parse header finish, and the line is " << line;
-                    setState(ParserState::ParseBody);
+                    setState(ParserState::ParseFinish);
                 } else {        // 如果能够找到冒号
                     std::string key(line.begin(), colon);
                     std::string value(colon + 1, line.end());
                     // LOG_DEBUG << "{" << key << "," << value << "}";     // 调试看结果
                     request_.addHeaderKv(key, value);
                 }
+                break;
+            }
+            case ParserState::ParseBody:{
+                setState(ParserState::ParseFinish);
                 break;
             }
             default:

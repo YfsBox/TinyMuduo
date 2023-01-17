@@ -63,7 +63,7 @@ void TcpServer::newConnFunc(int fd, SockAddress &address) {
     memset(name_buf, 0, sizeof(name_buf));
     sprintf(name_buf, "#%s:%u:%u", ip_.c_str(), port_, curr_conn_number_++);
     std::string conn_name = name_buf;
-    LOG_INFO << "A new connection come(" << name_buf << ")";
+    // LOG_INFO << "A new connection come(" << name_buf << ")";
     // 获取local addr
     sockaddr_in localaddr;
     bzero(&localaddr, sizeof(localaddr));

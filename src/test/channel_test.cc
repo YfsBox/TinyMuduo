@@ -57,8 +57,8 @@ void TestChannel::readingFunc() {
     auto tmpcnt = read_cnt_;
     uint64_t num = 1;
     while (tmpcnt) {
-        LOG_DEBUG << "begin write to test channel " << test_channel_->getFd() << " wait "
-        << interval_millseconds_ << " mills before write";
+        /*LOG_DEBUG << "begin write to test channel " << test_channel_->getFd() << " wait "
+        << interval_millseconds_ << " mills before write";*/
         std::this_thread::sleep_for(std::chrono::milliseconds(interval_millseconds_));
         ::write(test_channel_->getFd(), &num, sizeof(num));
         tmpcnt--;
