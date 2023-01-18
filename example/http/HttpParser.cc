@@ -3,7 +3,6 @@
 //
 #include "HttpParser.h"
 #include "../../src/base/Buffer.h"
-#include "../../src/logger/Logger.h"
 
 using namespace TinyHttp;
 

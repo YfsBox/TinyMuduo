@@ -5,8 +5,6 @@
 #include "HttpServer.h"
 #include "HttpParser.h"
 #include "HttpReponse.h"
-#include "../../src/base/Timestamp.h"
-#include "../../src/base/Buffer.h"
 
 using namespace TinyHttp;
 using namespace TinyMuduo;
@@ -14,7 +12,7 @@ using namespace TinyMuduo;
 HttpServer::HttpServer(const std::string &name,
                        const std::string &ip,
                        uint32_t port, size_t io_threads_num,
-                       TinyMuduo::EventLoop *loop, const std::string pool_name):
+                       TinyMuduo::EventLoop *loop, const std::string &pool_name):
         server_(name, ip, port, io_threads_num, loop, pool_name){
     server_.setIoThreadNumber(io_threads_num);
     server_.setConnCb(std::bind(&HttpServer::onConn, this, std::placeholders::_1));

@@ -88,6 +88,14 @@ void TcpConnection::errorHandle() {
     LOG_ERROR << "The error handle in the TcpConnection, the errorno is "
     << errno << " and the fd is " << channel_->getFd() << " and the channel is "
     << reinterpret_cast<uintptr_t>(channel_.get());
+    int optval;
+    socklen_t optlen = sizeof(optval);
+    int err = 0;
+    if(::getsockopt(channel_->getFd(), SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0) {
+        err = errno;
+    } else {
+        err = optval;
+    }
 }
 
 void TcpConnection::establish() {       // 该函数也要保证放在该loop所处的线程中处理

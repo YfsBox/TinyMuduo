@@ -1,8 +1,8 @@
 //
 // Created by 杨丰硕 on 2023/1/15.
 //
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 #include <sys/timerfd.h>
 #include "TimerQueue.h"
 #include "../logger/Logger.h"

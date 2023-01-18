@@ -1,7 +1,7 @@
 //
 // Created by 杨丰硕 on 2023/1/8.
 //
-#include <stdio.h>
+#include <cstdio>
 #include "../base/Thread.h"
 #include "AsyncLogging.h"
 #include "Logger.h"

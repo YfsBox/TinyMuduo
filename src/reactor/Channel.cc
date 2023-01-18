@@ -45,6 +45,8 @@ void Channel::handleEvent() {           // 这里暂时不考虑悬空引用的�
 }
 
 void Channel::handleEventWithGuard() {
+    /*LOG_DEBUG << reinterpret_cast<uintptr_t>(this) << " revent " << (revent_ & READ_EVENT)
+    << " and " << (revent_ & EPOLLERR);*/
     if (revent_ & READ_EVENT) {     // 可读事件
         if (read_callback_) {
             // LOG_DEBUG << reinterpret_cast<uintptr_t>(this) << " call the read callback";

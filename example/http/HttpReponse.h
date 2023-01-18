@@ -54,7 +54,7 @@ namespace TinyHttp {
             status_message_ = msg;
         }
 
-        void setBody(const std::string body) {
+        void setBody(const std::string &body) {
             body_ = body;
         }
 

@@ -5,6 +5,7 @@
 #ifndef TINYMUDUO_THREAD_H
 #define TINYMUDUO_THREAD_H
 
+#include <iostream>
 #include <thread>
 #include <memory>
 #include <atomic>

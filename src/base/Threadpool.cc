@@ -1,7 +1,7 @@
 //
 // Created by 杨丰硕 on 2023/1/9.
 //
-#include <assert.h>
+#include <cassert>
 #include "Thread.h"
 #include "Threadpool.h"
 

@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     TinyMuduo::AsyncLogging::getInstance().start();*/
 
     TinyMuduo::EventLoop loop;
-    TinyHttp::HttpServer server("test_server", "0.0.0.0", 12236, numThreads, &loop, "dummy");
+    TinyHttp::HttpServer server("test_server", "0.0.0.0", 12235, numThreads, &loop, "dummy");
 
     server.setHttpCallback(onRequest);
     server.start();

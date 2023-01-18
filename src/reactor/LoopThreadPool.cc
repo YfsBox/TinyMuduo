@@ -1,7 +1,7 @@
 //
 // Created by 杨丰硕 on 2023/1/13.
 //
-#include <string.h>
+#include <cstring>
 #include "LoopThreadPool.h"
 #include "EventLoopThread.h"
 #include "../reactor/EventLoop.h"

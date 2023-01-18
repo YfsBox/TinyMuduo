@@ -1,8 +1,7 @@
 //
 // Created by 杨丰硕 on 2023/1/8.
 //
-#include <iomanip>
-#include <sys/time.h>
+#include <ctime>
 #include "Timestamp.h"
 
 using namespace TinyMuduo;

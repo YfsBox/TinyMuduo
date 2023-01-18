@@ -1,7 +1,7 @@
 //
 // Created by 杨丰硕 on 2023/1/9.
 //
-#include <string.h>
+#include <cstring>
 #include "Acceptor.h"
 #include "TcpServer.h"
 #include "../net/TcpConnection.h"

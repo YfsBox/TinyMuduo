@@ -4,7 +4,7 @@
 #ifndef TINYMUDUO_LOGGERSTREAM_H
 #define TINYMUDUO_LOGGERSTREAM_H
 
-#include <string.h>
+#include <cstring>
 #include "../base/Utils.h"
 
 namespace TinyMuduo {

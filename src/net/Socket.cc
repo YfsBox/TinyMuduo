@@ -2,9 +2,9 @@
 // Created by 杨丰硕 on 2023/1/8.
 //
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <sys/socket.h>
 #include "Socket.h"
 #include "SockAddress.h"

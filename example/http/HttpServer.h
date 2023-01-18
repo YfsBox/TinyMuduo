@@ -25,7 +25,7 @@ namespace TinyHttp {
         using HttpCallback = std::function<void (const HttpRequest&, HttpReponse*)>;
         
         HttpServer(const std::string &name, const std::string &ip, uint32_t port,
-                   size_t io_threads_num, TinyMuduo::EventLoop *loop, const std::string pool_name);
+                   size_t io_threads_num, TinyMuduo::EventLoop *loop, const std::string &pool_name);
 
         ~HttpServer() = default;
 
