@@ -83,7 +83,7 @@ void Socket::setReusePort(bool on) {
 void Socket::shutdownWrite(int fd) {
     ssize_t ret = ::shutdown(fd, SHUT_WR);
     if (ret < 0) {
-        LOG_ERROR << "shut down the fd error " << fd;
+        LOG_ERROR << "shut down the fd " << fd << " errorno is " << errno;
     }
 }
 

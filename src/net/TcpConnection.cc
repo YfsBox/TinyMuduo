@@ -26,7 +26,8 @@ TcpConnection::TcpConnection(EventLoop *loop,
 
 TcpConnection::~TcpConnection() {
     // channel_->setDisable();
-    // LOG_INFO << "The TcpConnection " << channel_->getFd() << " removed";
+    /*LOG_INFO << "The TcpConnection whose channel is " <<
+    reinterpret_cast<uintptr_t>(channel_.get()) << " removed";*/
 }
 // handle本身就是在io线程中进行的
 // 下面的handle相关的，都是需要保证处于io线程中运行的，外部要调用的话必须要runInLoop
@@ -38,8 +39,10 @@ void TcpConnection::readHandle() {
     ssize_t retn = read_buffer_.read(channel_->getFd(), &error_no);
     if (retn > 0) {     //正常的读取
         // onMessage
+        // LOG_DEBUG << "channel ptr is " << reinterpret_cast<uintptr_t>(channel_.get()) << " call message in read handle";
         message_callback_(shared_from_this(), &read_buffer_, TimeStamp::getNowTimeStamp());
     } else if (retn == 0) {
+        // LOG_DEBUG << "channel ptr is " << reinterpret_cast<uintptr_t>(channel_.get()) << " call close in read handle";
         closeHandle();
     } else {
         errorHandle();
@@ -82,19 +85,22 @@ void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底
 }
 
 void TcpConnection::errorHandle() {
-    LOG_ERROR << "The error handle in the TcpConnection";
+    LOG_ERROR << "The error handle in the TcpConnection, the errorno is "
+    << errno << " and the fd is " << channel_->getFd() << " and the channel is "
+    << reinterpret_cast<uintptr_t>(channel_.get());
 }
 
 void TcpConnection::establish() {       // 该函数也要保证放在该loop所处的线程中处理
     if (state_ == Connecting) {
         setState(ConnectionState::Connected);
-        // channel_->tie(shared_from_this());
+        channel_->tie(shared_from_this());
         channel_->setReadable();
     }
     connection_callback_(shared_from_this());
 }
 
 void TcpConnection::destroy() {     //  这个函数需要保证放在TcpConnection所处的loop中
+    // LOG_DEBUG << "the TcpChannel destory, and channel " << reinterpret_cast<uintptr_t>(channel_.get());
     channel_->setDisable();
     channel_->remove();
     connection_callback_(shared_from_this());

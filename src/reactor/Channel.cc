@@ -2,6 +2,7 @@
 // Created by 杨丰硕 on 2023/1/9.
 //
 #include "Channel.h"
+#include "../logger/Logger.h"
 #include "../net/Socket.h"
 
 using namespace TinyMuduo;
@@ -27,24 +28,26 @@ Channel::Channel():
     revent_(NULL_EVENT),
     fd_(-1) {}
 
-Channel::~Channel() = default;
+Channel::~Channel() {
+    // LOG_DEBUG << "the Channel " << reinterpret_cast<uintptr_t>(this) << " destory";
+}
 
 void Channel::handleEvent() {           // 这里暂时不考虑悬空引用的情况
-    /*if(tied_) {
-        std::shared_ptr<void> guard;
-        guard = tie_.lock();
+    if(tied_) {
+        auto guard = tie_.lock();
         if(guard) {
             handleEventWithGuard();
         }
     } else {
         handleEventWithGuard();
-    }*/
-    handleEventWithGuard();
+    }
+    // handleEventWithGuard();
 }
 
 void Channel::handleEventWithGuard() {
     if (revent_ & READ_EVENT) {     // 可读事件
         if (read_callback_) {
+            // LOG_DEBUG << reinterpret_cast<uintptr_t>(this) << " call the read callback";
             read_callback_();
         }
     }
@@ -55,6 +58,7 @@ void Channel::handleEventWithGuard() {
     }
     if (revent_ & EPOLLERR) {
         if (error_callback_) {
+            // LOG_DEBUG << reinterpret_cast<uintptr_t>(this) << " call the error callback";
             error_callback_();
         }
     }
