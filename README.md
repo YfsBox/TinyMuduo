@@ -45,3 +45,13 @@ $ ./webbench -c 5000 -t 10 http://127.0.0.1:12235/
 其结果如下：
 
 ![](image/webbench.png)
+
+或者使用apache benchmark作为压测程序:
+
+```shell
+$ ab -n 1000000 -c 1000 -k http://127.0.0.1:12235/
+```
+
+结果如下：
+
+![](image/abbench.png)
