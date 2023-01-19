@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <map>
+#include <list>
 #include <sys/epoll.h>
 
 namespace TinyMuduo {
@@ -17,7 +18,7 @@ namespace TinyMuduo {
     public:
         using EventsVector = std::vector<epoll_event>;
 
-        using ChannelVector = std::vector<Channel*>;
+        using ChannelVector = std::list<Channel*>;
 
         using ChannelsMap = std::map<int, Channel*>;
 

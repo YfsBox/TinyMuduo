@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <vector>
+#include <list>
 #include <deque>
 #include <memory>
 #include <mutex>
@@ -26,7 +27,7 @@ namespace TinyMuduo {
 
     class EventLoop {
     public:
-        using ChannelVector = std::vector<Channel*>;
+        using ChannelVector = std::list<Channel*>;
         using QueuedFunctor = std::function<void()>;
         using TimerTask = std::function<void()>;
 

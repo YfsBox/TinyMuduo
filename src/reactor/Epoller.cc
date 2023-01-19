@@ -34,7 +34,6 @@ TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
     uint16_t epoll_cnt = ::epoll_wait(epoller_fd_, &*events_.begin(),
                                  static_cast<int>(events_.size()), timeout_millsecond);    // max_size就是一次读取的最大事件数
     TimeStamp now_time = TimeStamp::getNowTimeStamp();
-
     /*LOG_INFO << "epoll_wait return " << epoll_cnt << " events at time "
     << now_time.getTimeFormatString() << " on epoll_fd " << epoller_fd_;*/
     for (size_t i = 0; i < epoll_cnt; ++i) {       // 这里有一个地方需要注意, 要用的是epoll_cnt,而不是直接遍历events
