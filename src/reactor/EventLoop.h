@@ -27,7 +27,7 @@ namespace TinyMuduo {
 
     class EventLoop {
     public:
-        using ChannelVector = std::list<Channel*>;
+        using ChannelVector = std::vector<Channel*>;
         using QueuedFunctor = std::function<void()>;
         using TimerTask = std::function<void()>;
 

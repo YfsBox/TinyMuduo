@@ -18,7 +18,7 @@ namespace TinyMuduo {
     public:
         using EventsVector = std::vector<epoll_event>;
 
-        using ChannelVector = std::list<Channel*>;
+        using ChannelVector = std::vector<Channel*>;
 
         using ChannelsMap = std::map<int, Channel*>;
 

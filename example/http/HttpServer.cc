@@ -22,7 +22,7 @@ HttpServer::HttpServer(const std::string &name,
 }
 
 void HttpServer::start() {
-    LOG_DEBUG << "Server " << server_.getName()
+    LOG_INFO << "Server " << server_.getName()
     << "start and listening on port " << server_.getPort();
     server_.start();
 }

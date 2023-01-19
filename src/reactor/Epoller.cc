@@ -36,6 +36,7 @@ TimeStamp Epoller::epoll(int timeout_second, ChannelVector &channel_list) {
     TimeStamp now_time = TimeStamp::getNowTimeStamp();
     /*LOG_INFO << "epoll_wait return " << epoll_cnt << " events at time "
     << now_time.getTimeFormatString() << " on epoll_fd " << epoller_fd_;*/
+    channel_list.reserve(epoll_cnt);
     for (size_t i = 0; i < epoll_cnt; ++i) {       // 这里有一个地方需要注意, 要用的是epoll_cnt,而不是直接遍历events
         // 从中读取指针，其中藏着Channel的指针
         Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
@@ -71,8 +72,7 @@ void Epoller::updateChannel(Channel *channel) {
             LOG_FATAL << "dont have this channel in channel map, channel fd is " << channel->getFd();
             assert(0);
         }
-        /*
-        assert(channels_map_.find(channel_fd) != channels_map_.end());
+        /*assert(channels_map_.find(channel_fd) != channels_map_.end());
         assert(channel == channels_map_[channel_fd]);*/
         if (channel->getEvent() == Channel::NULL_EVENT) {  // 如果是空的interested事件
             update(EPOLL_CTL_DEL, channel);

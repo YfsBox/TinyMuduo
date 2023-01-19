@@ -86,8 +86,7 @@ void TcpConnection::closeHandle() {         // 只有被动关闭才是最彻底
 
 void TcpConnection::errorHandle() {
     LOG_ERROR << "The error handle in the TcpConnection, the errorno is "
-    << errno << " and the fd is " << channel_->getFd() << " and the channel is "
-    << reinterpret_cast<uintptr_t>(channel_.get());
+    << errno << " and the fd is " << channel_->getFd();
     int optval;
     socklen_t optlen = sizeof(optval);
     int err = 0;
