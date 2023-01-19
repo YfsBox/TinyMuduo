@@ -7,7 +7,7 @@
 + 使用gtest编写单元测试代码。
 + 采用one loop per thread + 线程池的多线程模型。
 + 实现了非阻塞IO + 水平触发EPOLL的Reactor模式，其中使用基于eventfd的技术唤醒正在休眠中的EPOLLER，实现Buffer来处理非阻塞IO的读写问题。
-+ 实现了strean风格的异步日志系统。
++ 实现了stream风格的异步日志系统。
 + 基于此库实现了基础的http服务器，并且使用webbench进行了压力测试。
 
 ## 2.安装与构建
