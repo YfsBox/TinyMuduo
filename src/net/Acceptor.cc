@@ -41,7 +41,7 @@ void Acceptor::handleNewConn() {
         // 错误的情况
         if (errno == EMFILE) {      // 错误类型对应了文件描述符耗尽的类型
             ::close(idel_fd_);
-            ::accept(idel_fd_, nullptr, nullptr);
+            idel_fd_ = ::accept(socket_.getFd(), nullptr, nullptr);
             ::close(idel_fd_);
             idel_fd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
         }
